@@ -1,6 +1,26 @@
 /* Four more jobs for the Disassemble and assemble studio. Same data format as assemblies.js. */
 import { R, C, P, T, bolts, doStep, torque } from './assemblies.js';
 
+
+/* Path of a belt wrapped round circles [x, y, r], listed clockwise on the screen, using outer tangent lines. */
+function hull(cs) {
+  var n = cs.length, seg = [], i;
+  for (i = 0; i < n; i++) {
+    var a = cs[i], b = cs[(i + 1) % n];
+    var dx = b[0] - a[0], dy = b[1] - a[1], L = Math.sqrt(dx * dx + dy * dy);
+    var nx = dy / L, ny = -dx / L, ex = dx / L, ey = dy / L;
+    var sb = (a[2] - b[2]) / L, cb = Math.sqrt(1 - sb * sb);
+    var ux = nx * cb + ex * sb, uy = ny * cb + ey * sb;
+    seg.push([[a[0] + a[2] * ux, a[1] + a[2] * uy], [b[0] + b[2] * ux, b[1] + b[2] * uy]]);
+  }
+  var d = 'M' + seg[0][0][0].toFixed(1) + ' ' + seg[0][0][1].toFixed(1);
+  for (i = 0; i < n; i++) {
+    var nxt = (i + 1) % n, c = cs[nxt];
+    d += 'L' + seg[i][1][0].toFixed(1) + ' ' + seg[i][1][1].toFixed(1) + 'A' + c[2] + ' ' + c[2] + ' 0 0 1 ' + seg[nxt][0][0].toFixed(1) + ' ' + seg[nxt][0][1].toFixed(1);
+  }
+  return d + 'Z';
+}
+
 export var EVEN_MORE = [
 
   /* ---------------------------------------------------------------- Brake caliper overhaul */
@@ -138,7 +158,7 @@ export var EVEN_MORE = [
       { say: 'The belt is at its service interval. The idler is rough.', inspect: { timingbelt: { reading: 'Cracked and oil-stained edge', pass: false }, tensioner: { reading: 'Spring weak', pass: false }, idler: { reading: 'Rough and noisy', pass: false } } },
       { say: 'A noise from the front of the engine. The tensioner bearing is loose.', inspect: { timingbelt: { reading: 'Some fraying', pass: false }, tensioner: { reading: 'Bearing loose', pass: false }, idler: { reading: 'Smooth', pass: true } } }
     ],
-    spec: [['Cover bolts', '10 mm socket', '8 N m'], ['Crank pulley bolt', '19 mm socket', '180 N m, locked with the tool'], ['Tensioner bolt', '13 mm socket', '25 N m'], ['Idler bolt', '13 mm socket', '25 N m'], ['Timing marks', '', 'Cylinder 1 at top centre, cam and crank locked']],
+    spec: [['Cover bolts', '10 mm socket', '8 N m'], ['Tensioner bolt', '13 mm socket', '25 N m'], ['Idler bolt', '13 mm socket', '25 N m'], ['Timing marks', '', 'Cylinder 1 at top centre, cam and crank locked']],
     prep: [
       { id: 'battery', label: 'Disconnect the battery earth lead', ok: true },
       { id: 'cold', label: 'Make sure the engine is cold', ok: true },
@@ -146,29 +166,32 @@ export var EVEN_MORE = [
       { id: 'skip', label: 'Skip locking the timing and just count the belt teeth', ok: false, why: 'Without locking at top centre, the camshaft and crankshaft can move apart. On an interference engine this bends valves and wrecks the engine.' }
     ],
     parts: [
-      { id: 'accbelt', name: 'Accessory drive belt', c: [200, 280], needs: [], svg: P('M262 190L150 295A45 45 0 0 0 150 380L262 242', 'k', 'stroke:var(--ink);stroke-width:8;opacity:0.7'),
+      { id: 'accbelt', name: 'Accessory drive belt', c: [225, 220], needs: [], svg: P(hull([[120, 150, 26], [330, 290, 44]]), 'k', 'stroke:var(--ink);stroke-width:9;opacity:0.75'),
         remove: [doStep('Release the tensioner with the breaker bar and slip the belt off', 'breaker')],
         install: [doStep('Route the new belt as in the diagram', 'breaker')] },
-      { id: 'cover', name: 'Timing cover', c: [380, 200], needs: ['accbelt'], svg: R(250, 90, 260, 250, 'tint-c') + T(380, 340, 'Timing cover', 'tsm', 'middle'),
+      { id: 'cover', name: 'Timing cover', c: [330, 200], needs: ['accbelt'], svg: R(188, 62, 284, 276, 'box', 14) + R(188, 62, 284, 276, 'tint-c', 14) + R(200, 74, 260, 252, 'k2', 10) + T(330, 84, 'Timing cover', 'tsm', 'middle'),
         remove: [bolts('Remove the six cover bolts', 'sock-10', 6, [3, 2], [0, 5, 1, 4, 2, 3]), doStep('Lift the cover off', null)],
         install: [doStep('Fit the cover', null), bolts('Fit the six cover bolts', 'sock-10', 6, [3, 2], [0, 5, 1, 4, 2, 3]), torque('Torque the cover bolts', 'sock-10', 8)] },
-      { id: 'tensioner', name: 'Tensioner', c: [440, 240], needs: ['cover'], svg: C(440, 240, 24, 'box tint-m') + T(440, 245, 'Tension', 'tsm', 'middle'),
+      { id: 'tensioner', name: 'Tensioner', c: [270, 204], needs: ['cover'], svg: C(270, 204, 17, 'box tint-m') + C(270, 204, 5, 'metal-dark') + T(270, 232, 'Tensioner', 'tsm', 'middle'),
         remove: [doStep('Lock the crankshaft and camshaft at top centre with the timing tools', 'lock'), doStep('Slacken the tensioner bolt', 'sock-13')],
         renew: true,
         inspect: { label: 'Spin the tensioner bearing and check the spring', limit: 'Smooth, firm spring', fail: 'The tensioner bearing or spring is weak: replace it with the kit.' },
         install: [doStep('Fit the new tensioner loosely', null), torque('Set the tensioner bolt to its torque', 'sock-13', 25)] },
-      { id: 'timingbelt', name: 'Timing belt', c: [380, 220], needs: ['tensioner'], svg: P('M300 270L330 130', 'k', 'stroke:var(--yellow-ink);stroke-width:12;opacity:0.8') + P('M330 130A40 40 0 0 1 430 120L470 250', 'k', 'stroke:var(--yellow-ink);stroke-width:12;opacity:0.8') + P('M470 250L336 300', 'k', 'stroke:var(--yellow-ink);stroke-width:12;opacity:0.8'),
+      { id: 'timingbelt', name: 'Timing belt', c: [330, 200], needs: ['tensioner'], svg: P(hull([[250, 110, 34], [410, 110, 34], [330, 290, 28]]), 'k', 'stroke:var(--yellow-ink);stroke-width:10;opacity:0.85'),
         remove: [doStep('Slide the belt off the sprockets and the idler', null)],
         renew: true,
         inspect: { label: 'Examine the old belt for cracks, fraying and oil', limit: 'No cracks or contamination', fail: 'The belt is damaged: it must be replaced, and the cause of any oil found.' },
         install: [doStep('Fit the new belt with the engine still locked, keeping the drive side tight', null), doStep('Remove the locking tools, turn the engine two full turns by hand and recheck the timing marks', 'lock')] },
-      { id: 'idler', name: 'Idler roller', c: [380, 232], needs: ['timingbelt'], svg: C(380, 232, 18, 'box tint-c'),
+      { id: 'idler', name: 'Idler roller', c: [390, 206], needs: ['timingbelt'], svg: C(390, 206, 15, 'box tint-c') + C(390, 206, 4, 'metal-dark') + T(390, 232, 'Idler', 'tsm', 'middle'),
         remove: [doStep('Remove the idler roller bolt', 'sock-13')],
         renew: true,
         inspect: { label: 'Spin the idler roller and listen for roughness', limit: 'Smooth and quiet', fail: 'The idler is rough: replace it with the kit.' },
         install: [doStep('Fit the new idler', 'sock-13'), torque('Torque the idler bolt', 'sock-13', 25)] }
     ],
-    statics: R(120, 60, 130, 300, 'metal') + C(300, 300, 32, 'metal-dark') + C(430, 130, 34, 'metal-dark') + T(185, 215, 'Engine', 'tsm', 'middle'),
+    statics: R(70, 30, 510, 340, 'metal', 8) + T(110, 58, 'Engine front', 'tsm') +
+      C(250, 110, 34, 'metal-dark') + C(250, 110, 8, 'box') + T(250, 114, 'Cam', 'tsm', 'middle') + C(410, 110, 34, 'metal-dark') + C(410, 110, 8, 'box') + T(410, 114, 'Cam', 'tsm', 'middle') + C(330, 290, 28, 'metal-dark') + C(330, 290, 7, 'box') +
+      P('M244 76h12M244 144h12M214 110v12M286 110v-12', 'k2') + P('M404 76h12M404 144h12', 'k2'),
+    overlay: C(120, 150, 26, 'metal-dark') + C(120, 150, 7, 'box') + C(330, 290, 44, 'metal-dark') + C(330, 290, 14, 'box') + T(330, 350, 'Crank pulley', 'tsm', 'middle') + T(120, 192, 'Alternator', 'tsm', 'middle'),
     final: ['Rotate the engine by hand two full turns and recheck the timing marks', 'Refit the accessory belt and reconnect the battery', 'Start the engine and listen for noise from the front', 'Reset the service reminder and note the belt change on the job card']
   }
 ];

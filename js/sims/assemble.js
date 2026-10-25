@@ -54,7 +54,7 @@ function buildSvg(asm) {
   }).join('');
   return '<svg xmlns="http://www.w3.org/2000/svg" class="dg asm-svg" viewBox="0 0 640 480" role="group" aria-label="' + asm.title + '"><title>' + asm.title + '</title>' +
     '<rect x="14" y="390" width="612" height="84" rx="6" class="tint-y-soft"/><text x="614" y="406" class="tsm" text-anchor="end">Workbench</text>' +
-    asm.statics + parts + '</svg>';
+    asm.statics + parts + (asm.overlay ? '<g pointer-events="none">' + asm.overlay + '</g>' : '') + '</svg>';
 }
 
 function build(asm, onExit) {
