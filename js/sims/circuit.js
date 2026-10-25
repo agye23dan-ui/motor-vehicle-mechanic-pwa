@@ -34,6 +34,7 @@ function solve(s) {
     out.lampW = out.lampV * out.lampV / rl;
     if (s.fault === 'posR') out.note = 'A corroded connector in the positive wire adds resistance. Voltage is lost there and the lamps are dim.';
     else if (s.earth > 0.3) out.note = 'The earth path has high resistance, so voltage is lost there and the lamps are dim.';
+    else if (out.lampV > 14) out.note = 'Each lamp is getting ' + r(out.lampV, 1) + ' V but these are 12 V lamps. They would be overbright and burn out quickly. Use 24 V lamps, or put lamps in series.';
     else if (s.v < 11.5) out.note = 'The supply voltage is low, so the lamps are dim.';
     else out.note = 'The circuit is healthy: almost all of the voltage is used by the lamps.';
   }
@@ -155,7 +156,7 @@ export function build() {
         return h('tr', null, h('th', { scope: 'row' }, rw[0]), h('td', null, r(rw[1], 2) + ' V'), h('td', { class: 'small muted' }, rw[2]));
       }))));
   }
-  ctl.v = slider('Battery voltage', 10, 14.5, 0.1, 12.6, 'V', update, 1);
+  ctl.v = slider('Battery voltage', 10, 24, 0.1, 12.6, 'V', update, 1);
   ctl.w = select('Lamp rating', [['5', '5 W (sidelight)'], ['21', '21 W (brake lamp)'], ['55', '55 W (headlamp)']], '21', update);
   ctl.n = select('Number of lamps', [['1', '1'], ['2', '2'], ['3', '3'], ['4', '4'], ['5', '5'], ['6', '6']], '2', update);
   ctl.layout = select('Layout', [['series', 'In series'], ['parallel', 'In parallel']], 'parallel', update);

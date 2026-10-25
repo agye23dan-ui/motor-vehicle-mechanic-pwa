@@ -1,7 +1,7 @@
 /* Service worker. Generated into sw.js by scripts/build.js, which fills in VERSION and FILES. */
 'use strict';
 
-var VERSION = 'dcdfa8a1375c';
+var VERSION = 'e2a0e518231a';
 var CACHE = 'mvm-' + VERSION;
 var FILES = [
   "css/app.css",
@@ -80,6 +80,7 @@ var FILES = [
   "js/sims/kit.js",
   "js/sims/scantool.js",
   "js/sims/scope.js",
+  "js/sims/toolicons.js",
   "js/srs.js",
   "js/store.js",
   "js/ui.js",

@@ -2,6 +2,7 @@ import { h, svgFromString } from '../dom.js';
 import * as store from '../store.js';
 import { icon } from '../icons.js';
 import { ASSEMBLIES, TOOLS } from './assemblies.js';
+import { toolIcon, toolCaption } from './toolicons.js';
 import { MORE } from './assemblies2.js';
 import { EVEN_MORE } from './assemblies3.js';
 
@@ -196,8 +197,8 @@ function build(asm, onExit) {
 
   function toolTray() {
     var wrap = h('div', { class: 'asm-tools', role: 'radiogroup', 'aria-label': 'Tool tray' }, TOOLS.map(function (t) {
-      return h('button', { type: 'button', class: 'asm-tool' + (st.tool === t[0] ? ' sel' : ''), role: 'radio', 'aria-checked': st.tool === t[0] ? 'true' : 'false',
-        onclick: function () { st.tool = st.tool === t[0] ? null : t[0]; drawSide(); } }, t[1]);
+      return h('button', { type: 'button', class: 'asm-tool' + (st.tool === t[0] ? ' sel' : ''), role: 'radio', 'aria-checked': st.tool === t[0] ? 'true' : 'false', 'aria-label': t[1], title: t[1],
+        onclick: function () { st.tool = st.tool === t[0] ? null : t[0]; drawSide(); } }, toolIcon(t[0]), h('span', { class: 'asm-tool-cap' }, toolCaption(t[0])));
     }));
     return section('Tool tray' + (st.tool ? ': ' + toolName(st.tool) : ' (choose a tool)'), wrap);
   }
