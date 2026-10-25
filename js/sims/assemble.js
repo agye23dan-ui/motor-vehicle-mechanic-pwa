@@ -2,6 +2,9 @@ import { h, svgFromString } from '../dom.js';
 import * as store from '../store.js';
 import { icon } from '../icons.js';
 import { ASSEMBLIES, TOOLS } from './assemblies.js';
+import { MORE } from './assemblies2.js';
+
+var ALL = ASSEMBLIES.concat(MORE);
 
 /*
  * Disassemble and assemble studio. Pick a job, prepare safely, take the parts off in a valid
@@ -44,7 +47,7 @@ function boltPositions(n, layout) {
 }
 
 function buildSvg(asm) {
-  var parts = asm.parts.map(function (p) {
+  var parts = asm.parts.slice().reverse().map(function (p) {
     return '<g class="asm-part" data-id="' + p.id + '" tabindex="0" role="button" aria-label="' + p.name + '">' + p.svg + '</g>';
   }).join('');
   return '<svg xmlns="http://www.w3.org/2000/svg" class="dg asm-svg" viewBox="0 0 640 480" role="group" aria-label="' + asm.title + '"><title>' + asm.title + '</title>' +
@@ -64,7 +67,7 @@ function build(asm, onExit) {
   var side = h('div', { class: 'asm-side' });
   var log = h('div', { class: 'asm-log', role: 'status', 'aria-live': 'polite' });
   var banner = h('div', { class: 'asm-banner' });
-  var root = h('div', { class: 'sim-layout asm-layout' }, h('div', { class: 'sim-main' }, banner, h('div', { class: 'sim-figure' }, svgEl), log), side);
+  var root = h('div', { class: 'sim-layout asm-layout', 'data-scenario': JSON.stringify(scenario.inspect) }, h('div', { class: 'sim-main' }, banner, h('div', { class: 'sim-figure' }, svgEl), log), side);
 
   function say(text, kind) { st.msgs.unshift({ text: text, kind: kind || 'info' }); st.msgs = st.msgs.slice(0, 5); drawLog(); }
   function penalty(cat, why) { st.pen[cat] += PEN[cat]; say((why || '') + ' (minus ' + PEN[cat] + ' points)', 'bad'); drawBanner(); }
@@ -383,14 +386,14 @@ function build(asm, onExit) {
 
 export default {
   id: 'assemble', title: 'Disassemble and assemble studio', icon: 'wrench',
-  blurb: 'Strip down a disc brake, cylinder head, clutch or alternator on screen. Choose the tools, follow the sequence, inspect the parts and rebuild to the right torque.',
+  blurb: 'Strip down a disc brake, drum brake, cylinder head, clutch, alternator, starter, water pump, wheel bearing or driveshaft on screen. Choose the tools, follow the sequence, inspect the parts and rebuild to the right torque.',
   lesson: ['m02-l7', 'Dismantling, inspecting and reassembling good practice'],
   build: function () {
     var root = h('div', { class: 'asm' });
     function pick() {
       var scores = best();
       root.replaceChildren(h('p', null, 'Choose a job. You will prepare safely, take the parts off in the right order with the right tools, inspect them against the manual limits, then rebuild. Mistakes cost points and are explained.'),
-        h('div', { class: 'tool-grid studio-grid' }, ASSEMBLIES.map(function (a) {
+        h('div', { class: 'tool-grid studio-grid' }, ALL.map(function (a) {
           return h('button', { type: 'button', class: 'hub-card sim-card asm-card', onclick: function () { root.replaceChildren(build(a, pick)); } },
             h('h3', null, a.title), h('p', null, a.blurb), h('span', { class: 'case-stars' }, starText(scores[a.id] || 0)), h('span', { class: 'go' }, 'Start', icon('chevron', 16)));
         })));

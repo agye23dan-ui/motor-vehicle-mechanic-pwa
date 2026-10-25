@@ -5,22 +5,23 @@
  * workshop manual for a real job.
  */
 
-function R(x, y, w, h, c, rx) { return '<rect x="' + x + '" y="' + y + '" width="' + w + '" height="' + h + '" rx="' + (rx || 0) + '" class="' + c + '"/>'; }
-function C(x, y, r, c) { return '<circle cx="' + x + '" cy="' + y + '" r="' + r + '" class="' + c + '"/>'; }
-function P(d, c, st) { return '<path d="' + d + '" class="' + (c || 'k') + '"' + (st ? ' style="' + st + '"' : '') + '/>'; }
-function T(x, y, s, cls, a) { return '<text x="' + x + '" y="' + y + '" class="' + (cls || 'tsm') + '"' + (a ? ' text-anchor="' + a + '"' : '') + '>' + s + '</text>'; }
+export function R(x, y, w, h, c, rx) { return '<rect x="' + x + '" y="' + y + '" width="' + w + '" height="' + h + '" rx="' + (rx || 0) + '" class="' + c + '"/>'; }
+export function C(x, y, r, c) { return '<circle cx="' + x + '" cy="' + y + '" r="' + r + '" class="' + c + '"/>'; }
+export function P(d, c, st) { return '<path d="' + d + '" class="' + (c || 'k') + '"' + (st ? ' style="' + st + '"' : '') + '/>'; }
+export function T(x, y, s, cls, a) { return '<text x="' + x + '" y="' + y + '" class="' + (cls || 'tsm') + '"' + (a ? ' text-anchor="' + a + '"' : '') + '>' + s + '</text>'; }
 
 export var TOOLS = [
   ['sock-10', '10 mm socket'], ['sock-12', '12 mm socket'], ['sock-13', '13 mm socket'], ['sock-17', '17 mm socket'], ['sock-19', '19 mm socket'],
   ['torx-t40', 'Torx T40 bit'], ['torx-t55', 'Torx T55 bit'], ['allen-6', '6 mm Allen key'], ['screw', 'Screwdriver or impact driver'],
   ['breaker', 'Breaker bar'], ['hook', 'Caliper hook'], ['piston', 'Brake piston tool'], ['puller', 'Bearing puller'],
-  ['align', 'Clutch alignment tool'], ['lock', 'Flywheel locking tool'], ['gauge', 'Gauges and straight edge'], ['grease', 'Brake grease']
+  ['align', 'Clutch alignment tool'], ['lock', 'Flywheel locking tool'], ['gauge', 'Gauges and straight edge'], ['grease', 'Brake grease'],
+  ['sock-32', '32 mm socket'], ['pliers', 'Spring pliers'], ['flare', 'Flare-nut spanner'], ['pry', 'Pry bar'], ['mallet', 'Soft mallet']
 ];
 
 /* Bolt step helpers. Layouts: 'circle' (n bolts round a ring), or [cols, rows] grid. */
-function bolts(label, tool, n, layout, order) { return { t: 'bolts', label: label, tool: tool, n: n, layout: layout, order: order }; }
-function doStep(label, tool) { return { t: 'do', label: label, tool: tool || null }; }
-function torque(label, tool, value, unit) { return { t: 'torque', label: label, tool: tool, value: value, unit: unit || 'N m' }; }
+export function bolts(label, tool, n, layout, order) { return { t: 'bolts', label: label, tool: tool, n: n, layout: layout, order: order }; }
+export function doStep(label, tool) { return { t: 'do', label: label, tool: tool || null }; }
+export function torque(label, tool, value, unit) { return { t: 'torque', label: label, tool: tool, value: value, unit: unit || 'N m' }; }
 
 export var ASSEMBLIES = [
 
