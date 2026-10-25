@@ -5,7 +5,7 @@ Vanilla JavaScript, no framework, no runtime dependencies, no accounts. Progress
 
 **Content:** 21 modules in three semesters, 224 lessons (about 153,000 words, 19 hours of reading), 21 practical task sheets with instructor sign-off, 1,216 quiz questions with explanations, 930 flashcards, 68 drawn diagrams, a fault finder with 70 faults (causes, diagnosis, repair), 9 workshop calculators, and a 40-question timed exam (60 min, pass mark 70%).
 
-**Simulation studio:** 11 interactive simulations: 10 diagnosis cases, a circuit lab, a scan-tool trainer with a hidden-fault mystery mode, an oscilloscope trainer, an animated four-stroke engine, cooling, starting and charging, brake, gearbox and wheel alignment simulators, and an A/C gauge simulator, plus 9 calculators.
+**Simulation studio:** 12 interactive simulations, including a disassemble and assemble studio (disc brake, cylinder head, clutch and alternator: safety prep, tools, bolt sequences, inspection against limits, new parts, torque and a score), 10 diagnosis cases, a circuit lab, a scan-tool trainer with a hidden-fault mystery mode, an oscilloscope trainer, an animated four-stroke engine, cooling, starting and charging, brake, gearbox and wheel alignment simulators, and an A/C gauge simulator, plus 9 calculators.
 
 **Study tools:** full-course search, bookmarks and personal notes per lesson, a 15-week study plan per semester, a practical logbook (printable), and spaced-repetition flashcards.
 

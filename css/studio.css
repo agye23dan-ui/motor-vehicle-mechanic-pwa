@@ -63,3 +63,35 @@
 .scan-dtc { color: #ffc24a; }
 .tool-results .good dd { color: var(--green-ink); }
 .tool-results .odd dd { color: var(--magenta-ink); }
+
+/* Disassemble and assemble studio */
+.asm-svg { max-height: 36rem; }
+.asm-part { cursor: pointer; transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s; transform-box: fill-box; transform-origin: center; outline: none; }
+.asm-part:hover, .asm-part:focus-visible { filter: brightness(1.12) drop-shadow(0 0 3px var(--cyan)); }
+.asm-part.active { filter: drop-shadow(0 0 4px var(--magenta)); }
+.asm-banner { margin-bottom: 0.7rem; }
+.asm-phase { display: flex; justify-content: space-between; align-items: center; gap: 1rem; padding: 0.6rem 0.9rem; border-radius: var(--radius); background: var(--tint-cyan); }
+.asm-score { font-weight: 800; font-variant-numeric: tabular-nums; }
+.asm-log { margin-top: 0.7rem; display: grid; gap: 0.35rem; }
+.asm-msg { margin: 0; padding: 0.5rem 0.8rem; border-radius: var(--radius); border-left: 4px solid var(--ink-3); background: var(--sheet); font-size: 0.95rem; }
+.asm-msg.good { border-left-color: var(--green); background: var(--tint-green); }
+.asm-msg.bad { border-left-color: var(--magenta); background: var(--tint-yellow); }
+.asm-sec { margin-bottom: 1.1rem; }
+.asm-sec h3 { font-size: 1.02rem; margin: 0 0 0.45rem; }
+.asm-tools { display: flex; flex-wrap: wrap; gap: 0.35rem; }
+.asm-tool { border: 1.5px solid var(--ink); background: var(--paper); color: var(--ink); border-radius: 1.4rem; padding: 0.3rem 0.7rem; min-height: 2.2rem; font: inherit; font-size: 0.88rem; font-weight: 700; cursor: pointer; }
+.asm-tool.sel { background: var(--ink); color: var(--paper); }
+.asm-parts { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.3rem; }
+.asm-partbtn { width: 100%; display: flex; justify-content: space-between; gap: 0.6rem; text-align: left; padding: 0.5rem 0.7rem; border: 1.5px solid var(--rule); border-radius: var(--radius); background: var(--paper); color: var(--ink); font: inherit; cursor: pointer; }
+.asm-partbtn.sel { border-color: var(--ink); background: var(--tint-key); }
+.asm-state { color: var(--ink-2); font-size: 0.85rem; }
+.asm-steps { margin: 0.4rem 0; padding-left: 1.3rem; display: grid; gap: 0.25rem; font-size: 0.93rem; }
+.asm-steps .done { color: var(--green-ink); text-decoration: line-through; }
+.asm-steps .now { font-weight: 800; }
+.asm-boltpad { max-width: 15rem; margin: 0.5rem 0; }
+.asm-bolt { cursor: pointer; outline: none; }
+.asm-bolt:hover circle, .asm-bolt:focus-visible circle { stroke-width: 3; }
+.asm-torque { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+.asm-reading { font-size: 1.1rem; }
+.asm-spec th { width: 36%; }
+.asm-card { text-align: left; font: inherit; cursor: pointer; border: 1.5px solid var(--ink); }
