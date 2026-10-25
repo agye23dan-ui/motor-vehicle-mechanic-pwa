@@ -67,8 +67,8 @@ export function build() {
     // bypass
     g += '<path d="M170 135H140V190H170" fill="none" stroke="' + hot + '" stroke-width="5" stroke-dasharray="4 4" opacity="' + (1 - s.open * 0.8).toFixed(2) + '"/>';
     // fan
-    g += '<g transform="translate(22 140)"><circle r="14" class="box ' + (fanOn ? 'tint-c' : '') + '"/><path d="M0 0L9 -6M0 0L-9 -6M0 0L0 10" class="k"/></g>';
-    g += '<text x="22" y="170" class="tsm" text-anchor="middle">' + (fanOn ? 'Fan on' : 'Fan off') + '</text>';
+    g += '<g transform="translate(53 140)"><circle r="14" class="box ' + (fanOn ? 'tint-c' : '') + '"/><path d="M0 0L9 -6M0 0L-9 -6M0 0L0 10" class="k"/></g>';
+    g += '<text x="53" y="280" class="tsm" text-anchor="middle">' + (fanOn ? 'Fan on' : 'Fan off') + '</text>';
     // graph
     var gx = 320, gy = 40, gw = 220, gh = 190;
     g += '<rect x="' + gx + '" y="' + gy + '" width="' + gw + '" height="' + gh + '" rx="4" class="box"/>';

@@ -51,9 +51,9 @@ export function build() {
     var s = state(), o = simulate(s);
     var svg = '<svg xmlns="http://www.w3.org/2000/svg" class="dg" viewBox="0 0 560 300" role="img" aria-label="Starting and charging results"><title>Starting and charging</title><desc>Bars showing cranking voltage, cranking speed, charging voltage and charge current.</desc>';
     svg += bar(20, 30, 330, o.vbat, 13, 'Battery voltage while cranking (needs over 9.6 V)', r(o.vbat, 1) + ' V', o.vbat >= 9.6 ? 'tint-g' : 'tint-m');
-    svg += '<path d="M' + (20 + 330 * 9.6 / 13) + ' 24V58" class="barrier"/>';
+    svg += '<path d="M' + (20 + 330 * 9.6 / 13) + ' 30V52" class="barrier"/>';
     svg += bar(20, 90, 330, o.speed, 120, 'Cranking speed (70% or more starts the engine)', r(o.speed, 0) + '%', o.speed >= 70 ? 'tint-g' : 'tint-m');
-    svg += '<path d="M' + (20 + 330 * 70 / 120) + ' 84V118" class="barrier"/>';
+    svg += '<path d="M' + (20 + 330 * 70 / 120) + ' 90V112" class="barrier"/>';
     svg += bar(20, 150, 330, o.vrun, 15, 'Bus voltage with the engine running (13.8 to 14.5 V is healthy)', r(o.vrun, 1) + ' V', o.vrun >= 13.5 ? 'tint-g' : 'tint-m');
     svg += bar(20, 210, 330, Math.abs(o.charge), 40, 'Charge into the battery (negative means discharge)', r(o.charge, 0) + ' A', o.charge > 0 ? 'tint-c' : 'tint-m');
     svg += '<text x="20" y="276" class="tsm">' + (o.starts ? 'The engine would start.' : 'The engine would crank too slowly or not at all.') + '</text>';

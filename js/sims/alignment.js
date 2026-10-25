@@ -25,7 +25,7 @@ export function build() {
     [[60, 1], [180, -1]].forEach(function (w) {
       s += '<g transform="translate(' + w[0] + ' 80) rotate(' + (w[1] * ang * -1) + ')"><rect x="-10" y="-40" width="20" height="80" rx="4" class="box tint-c"/></g>';
     });
-    s += '<path d="M60 40V10M180 40V10" class="flow"/><path d="M60 120V300M180 120V300" class="dim"/>';
+    s += '<path d="M60 120V300M180 120V300" class="dim"/>';
     s += '<text x="140" y="320" class="tsm" text-anchor="middle">Toe ' + r(toe, 1) + ' mm (' + (toe > 0 ? 'toe-in' : toe < 0 ? 'toe-out' : 'straight') + '), angle exaggerated</text>';
     // front view
     s += '<text x="400" y="24" class="tb" text-anchor="middle">From the front (camber)</text>';

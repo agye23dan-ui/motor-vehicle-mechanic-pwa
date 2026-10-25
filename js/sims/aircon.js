@@ -36,8 +36,8 @@ function gauge(cx, cy, val, max, label, bandLo, bandHi, unit) {
   }
   var n = pt(val, 60);
   g += '<path d="M' + cx + ' ' + cy + 'L' + n[0].toFixed(1) + ' ' + n[1].toFixed(1) + '" class="k bold" style="stroke:var(--magenta-ink)"/><circle cx="' + cx + '" cy="' + cy + '" r="6" class="metal-dark"/>';
-  g += '<text x="' + cx + '" y="' + (cy + 40) + '" class="tb" text-anchor="middle">' + label + '</text>';
-  g += '<text x="' + cx + '" y="' + (cy + 60) + '" class="ts" text-anchor="middle">' + r(val, 0) + ' ' + unit + '</text>';
+  g += '<text x="' + cx + '" y="' + (cy + 102) + '" class="tb" text-anchor="middle">' + label + '</text>';
+  g += '<text x="' + cx + '" y="' + (cy + 122) + '" class="ts" text-anchor="middle">' + r(val, 0) + ' ' + unit + '</text>';
   return g;
 }
 
@@ -53,8 +53,8 @@ export function build() {
     if (ctl.fault.get() === 'fan' && rpm > 1500) high *= 0.88;
     if (ctl.fault.get() === 'restrict') low = Math.max(0, low - 4);
     var vent = 6 + (T - 30) * 0.2 + f.vent;
-    var svg = '<svg xmlns="http://www.w3.org/2000/svg" class="dg" viewBox="0 0 560 230" role="img" aria-label="Manifold gauge set: low side ' + r(low, 0) + ' psi, high side ' + r(high, 0) + ' psi"><title>A/C manifold gauges</title><desc>Two gauges showing the low-side and high-side pressures.</desc>' +
-      gauge(150, 110, low, 150, 'Low side', nl * 0.85, nl * 1.15, 'psi') + gauge(410, 110, high, 500, 'High side', nh * 0.9, nh * 1.1, 'psi') + '</svg>';
+    var svg = '<svg xmlns="http://www.w3.org/2000/svg" class="dg" viewBox="10 20 380 230" role="img" aria-label="Manifold gauge set: low side ' + r(low, 0) + ' psi, high side ' + r(high, 0) + ' psi"><title>A/C manifold gauges</title><desc>Two gauges showing the low-side and high-side pressures.</desc>' +
+      gauge(105, 110, low, 150, 'Low side', nl * 0.85, nl * 1.15, 'psi') + gauge(295, 110, high, 500, 'High side', nh * 0.9, nh * 1.1, 'psi') + '</svg>';
     paint(holder, svg);
     out.set([
       ['Fault', f.name],

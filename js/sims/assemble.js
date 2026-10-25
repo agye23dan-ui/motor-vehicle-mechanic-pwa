@@ -206,8 +206,13 @@ function build(asm, onExit) {
   function partList() {
     return section('Parts', h('ul', { class: 'asm-parts' }, asm.parts.map(function (p) {
       var on = isOnBench(p.id);
-      return h('li', null, h('button', { type: 'button', class: 'asm-partbtn' + (st.active === p.id ? ' sel' : '') + (on ? ' bench' : ''), onclick: function () { pickPart(p.id); } },
-        h('span', null, p.name), h('span', { class: 'asm-state' }, on ? 'on the bench' : 'fitted')));
+      var btn = h('button', { type: 'button', class: 'asm-partbtn' + (st.active === p.id ? ' sel' : '') + (on ? ' bench' : ''), onclick: function () { pickPart(p.id); } },
+        h('span', null, p.name), h('span', { class: 'asm-state' }, on ? 'on the bench' : 'fitted'));
+      btn.addEventListener('mouseenter', function () { if (groups[p.id]) groups[p.id].classList.add('hl'); });
+      btn.addEventListener('mouseleave', function () { if (groups[p.id]) groups[p.id].classList.remove('hl'); });
+      btn.addEventListener('focus', function () { if (groups[p.id]) groups[p.id].classList.add('hl'); });
+      btn.addEventListener('blur', function () { if (groups[p.id]) groups[p.id].classList.remove('hl'); });
+      return h('li', null, btn);
     })));
   }
 

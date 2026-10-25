@@ -52,7 +52,7 @@ export function build() {
     var burn = angle >= 360 && angle < 540;
     var sparkNow = Math.abs(angle - tm.spark) < 6 || Math.abs(angle - tm.spark - 720) < 6;
     var gas = angle < 180 ? '#4aa3df' : angle < 360 ? '#e8c53a' : angle < 540 ? '#d8442b' : '#8a8a8a';
-    var s = '<svg xmlns="http://www.w3.org/2000/svg" class="dg" viewBox="0 30 560 380" role="img" aria-label="Four-stroke engine at ' + Math.round(angle % 720) + ' degrees: ' + st[0] + ' stroke"><title>Four-stroke engine</title><desc>A piston moving in a cylinder with intake and exhaust valves, and a timing circle.</desc>';
+    var s = '<svg xmlns="http://www.w3.org/2000/svg" class="dg" viewBox="0 30 560 392" role="img" aria-label="Four-stroke engine at ' + Math.round(angle % 720) + ' degrees: ' + st[0] + ' stroke"><title>Four-stroke engine</title><desc>A piston moving in a cylinder with intake and exhaust valves, and a timing circle.</desc>';
     // cylinder
     s += '<rect x="' + (cx - BORE / 2 - 8) + '" y="' + (top - 6) + '" width="' + (BORE + 16) + '" height="' + (pistonTop + 60 - top + 150) + '" rx="4" class="metal" style="fill-opacity:0.12"/>';
     s += '<rect x="' + (cx - BORE / 2) + '" y="' + top + '" width="' + BORE + '" height="' + Math.max(0, pistonTop - top) + '" style="fill:' + gas + ';fill-opacity:0.45"/>';
@@ -70,7 +70,7 @@ export function build() {
     s += '<circle cx="' + cx + '" cy="' + crankY + '" r="' + (CRANK + 14) + '" class="metal" style="fill-opacity:0.15"/>';
     s += '<path d="M' + cx + ' ' + py + 'L' + kx.toFixed(1) + ' ' + ky.toFixed(1) + '" class="k bold"/><path d="M' + cx + ' ' + crankY + 'L' + kx.toFixed(1) + ' ' + ky.toFixed(1) + '" class="k bold"/>';
     s += '<circle cx="' + cx + '" cy="' + crankY + '" r="8" class="metal-dark"/><circle cx="' + kx.toFixed(1) + '" cy="' + ky.toFixed(1) + '" r="6" class="box"/>';
-    s += '<text x="' + cx + '" y="392" class="tb" text-anchor="middle">' + st[0] + ' stroke</text>';
+    s += '<text x="' + cx + '" y="414" class="tb" text-anchor="middle">' + st[0] + ' stroke</text>';
     // timing circle
     var ox = 410, oy = 190, R1 = 120;
     function pt(a2, rad) { var q = (a2 - 90) * Math.PI / 180; return [ox + rad * Math.cos(q), oy + rad * Math.sin(q)]; }

@@ -101,3 +101,19 @@
 .asm-tool { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.15rem; min-height: 4.2rem; padding: 0.35rem 0.2rem; border-radius: var(--radius); }
 .asm-tool .asm-tool-cap { font-size: 0.72rem; font-weight: 800; line-height: 1; }
 .asm-tool svg { display: block; }
+
+/* Small screens: keep diagram text readable and readouts tidy */
+@media (max-width: 600px) {
+  .sim-figure .dg .ts, .sim-figure .dg .tsm { font-size: 17px; }
+  .sim-figure .dg .tb { font-size: 19px; }
+  .sim-figure .dg .t { font-size: 17px; }
+  .tool-results > div { display: grid; grid-template-columns: 1fr; gap: 0.1rem; }
+  .tool-results dd { text-align: left; }
+  .sim-table th, .sim-table td { display: block; padding: 0.2rem 0; }
+  .sim-table tr { display: block; padding: 0.4rem 0; }
+}
+
+/* Labels stay readable when they sit over other shapes */
+.asm-svg text { paint-order: stroke; stroke: var(--paper); stroke-width: 3.5px; stroke-linejoin: round; }
+.asm-svg .asm-part:hover text { stroke: var(--paper); }
+.asm-part.hl { filter: brightness(1.12) drop-shadow(0 0 4px var(--cyan)); }

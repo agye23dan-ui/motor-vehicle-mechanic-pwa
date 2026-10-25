@@ -70,7 +70,7 @@ export function build() {
     s += '<rect x="' + x0 + '" y="' + y0 + '" width="' + gw + '" height="' + gh + '" rx="6" style="fill:#10181c"/>';
     for (var i = 0; i <= COLS; i++) s += '<path d="M' + (x0 + gw * i / COLS) + ' ' + y0 + 'V' + (y0 + gh) + '" stroke="#3d5058" stroke-width="' + (i % 5 === 0 ? 1.4 : 0.6) + '"/>';
     for (var j = 0; j <= ROWS; j++) s += '<path d="M' + x0 + ' ' + (y0 + gh * j / ROWS) + 'H' + (x0 + gw) + '" stroke="#3d5058" stroke-width="' + (j === ROWS / 2 ? 1.4 : 0.6) + '"/>';
-    var totalT = tdiv * COLS, d = '', maxV = -1e9, minV = 1e9, edges = 0, prev = null, clip = false;
+    var totalT = tdiv * COLS, d = '', maxV = -1e9, minV = 1e9, edges = 0, vals = [], clip = false;
     var N = 500;
     for (var k = 0; k <= N; k++) {
       var tt = totalT * k / N, v = fn(tt);
@@ -80,9 +80,10 @@ export function build() {
       var yy = Math.max(-ROWS / 2, Math.min(ROWS / 2, yv));
       var px = x0 + gw * k / N, py = y0 + gh / 2 - yy * gh / ROWS;
       d += (k ? 'L' : 'M') + px.toFixed(1) + ' ' + py.toFixed(1);
-      if (prev !== null && (v - prev) * (fn(totalT * (k + 1) / N) - v) < 0) edges++;
-      prev = v;
+      vals.push(v);
     }
+    var mid = (maxV + minV) / 2, band = (maxV - minV) * 0.08, side = 0;
+    vals.forEach(function (v) { var now = v > mid + band ? 1 : v < mid - band ? -1 : 0; if (now !== 0) { if (side !== 0 && now !== side) edges++; side = now; } });
     s += '<path d="' + d + '" fill="none" stroke="#5bf08b" stroke-width="2" stroke-linejoin="round"/>';
     s += '<text x="' + (x0 + 8) + '" y="' + (y0 + 16) + '" fill="#9fd2b0" font-size="12">' + vdiv + ' V/div   ' + (tdiv >= 1 ? tdiv + ' ms/div' : (tdiv * 1000) + ' us/div') + '</text>';
     s += '</svg>';
