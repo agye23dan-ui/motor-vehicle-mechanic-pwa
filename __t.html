@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Motor Vehicle Mechanic</title>
+<meta name="description" content="Offline study guide for the motor vehicle mechanic trade: engines, auto electrical, car air conditioning, drivetrain, brakes and steering. Lessons, practical sheets, quizzes, flashcards and a timed exam.">
+<meta name="theme-color" content="#f3f2ee" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#17191c" media="(prefers-color-scheme: dark)">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="preload" href="fonts/archivo-variable.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/atkinson-hyperlegible-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="css/app.css">
+<link rel="stylesheet" href="css/studio.css">
+<script>
+/* Apply saved theme and text size before first paint to avoid a flash. */
+try {
+  var t = localStorage.getItem('mvm-theme'), s = localStorage.getItem('mvm-size');
+  if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t;
+  if (s === 'small' || s === 'large') document.documentElement.dataset.size = s;
+} catch (e) {}
+</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<div id="announcer" class="sr-only" role="status" aria-live="polite"></div>
+<header class="topbar" id="topbar"></header>
+<nav class="tabs" id="tabs" aria-label="Main"></nav>
+<main id="main" tabindex="-1"><p class="loading">Loading…</p></main>
+<noscript><p style="padding:1rem">This study app needs JavaScript to run.</p></noscript>
+<script src="data/course.js"></script>
+<script src="data/index.js"></script>
+<script src="data/build.js"></script>
+<script type="module" src="js/app.js"></script>
+<script>window.__e=[];addEventListener('error',e=>__e.push(e.message));
+addEventListener('load',()=>setTimeout(async()=>{const sl=ms=>new Promise(r=>setTimeout(r,ms));location.hash='#/studio/circuit';for(let i=0;i<60&&!document.querySelector('.sim-figure');i++)await sl(200);
+try{const sel=[...document.querySelectorAll('select')];const lay=sel.find(s=>[...s.options].some(o=>o.value==='series'));lay.value='series';lay.dispatchEvent(new Event('change'));
+const nn=sel.find(s=>[...s.options].some(o=>o.value==='6'));nn.value='3';nn.dispatchEvent(new Event('change'));await sl(300);
+const h=document.querySelector('.sim-figure');const svg=h.querySelector('svg');const g=svg.querySelector('[data-part=l1]');const r=g.getBoundingClientRect();
+const fire=(t,x,y)=>h.dispatchEvent(new PointerEvent(t,{bubbles:true,clientX:x,clientY:y,pointerId:1}));
+g.dispatchEvent(new PointerEvent('pointerdown',{bubbles:true,clientX:r.left+r.width/2,clientY:r.top+r.height/2,pointerId:1}));
+fire('pointermove',r.left+r.width/2+10,r.top+r.height/2+90);fire('pointerup',0,0);}catch(e){__e.push('RUN '+e.message)}
+setTimeout(()=>document.title='ERR '+JSON.stringify(__e),300)},500))</script></body>
+</html>

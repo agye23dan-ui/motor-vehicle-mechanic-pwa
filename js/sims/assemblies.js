@@ -15,7 +15,7 @@ export var TOOLS = [
   ['torx-t40', 'Torx T40 bit'], ['torx-t55', 'Torx T55 bit'], ['allen-6', '6 mm Allen key'], ['screw', 'Screwdriver or impact driver'],
   ['breaker', 'Breaker bar'], ['hook', 'Caliper hook'], ['piston', 'Brake piston tool'], ['puller', 'Bearing puller'],
   ['align', 'Clutch alignment tool'], ['lock', 'Flywheel locking tool'], ['gauge', 'Gauges and straight edge'], ['grease', 'Brake grease'],
-  ['sock-32', '32 mm socket'], ['pliers', 'Spring pliers'], ['flare', 'Flare-nut spanner'], ['pry', 'Pry bar'], ['mallet', 'Soft mallet']
+  ['sock-32', '32 mm socket'], ['sock-22', '22 mm socket'], ['lockring', 'Lock-ring spanner'], ['pliers', 'Spring pliers'], ['flare', 'Flare-nut spanner'], ['pry', 'Pry bar'], ['mallet', 'Soft mallet']
 ];
 
 /* Bolt step helpers. Layouts: 'circle' (n bolts round a ring), or [cols, rows] grid. */

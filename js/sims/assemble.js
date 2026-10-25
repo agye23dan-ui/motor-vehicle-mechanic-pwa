@@ -3,8 +3,9 @@ import * as store from '../store.js';
 import { icon } from '../icons.js';
 import { ASSEMBLIES, TOOLS } from './assemblies.js';
 import { MORE } from './assemblies2.js';
+import { EVEN_MORE } from './assemblies3.js';
 
-var ALL = ASSEMBLIES.concat(MORE);
+var ALL = ASSEMBLIES.concat(MORE, EVEN_MORE);
 
 /*
  * Disassemble and assemble studio. Pick a job, prepare safely, take the parts off in a valid
@@ -386,7 +387,7 @@ function build(asm, onExit) {
 
 export default {
   id: 'assemble', title: 'Disassemble and assemble studio', icon: 'wrench',
-  blurb: 'Strip down a disc brake, drum brake, cylinder head, clutch, alternator, starter, water pump, wheel bearing or driveshaft on screen. Choose the tools, follow the sequence, inspect the parts and rebuild to the right torque.',
+  blurb: 'Strip down a disc brake, drum brake, caliper, cylinder head, clutch, alternator, starter, water pump, wheel bearing, driveshaft, tie-rod end, fuel pump or timing belt on screen. Choose the tools, follow the sequence, inspect the parts and rebuild to the right torque.',
   lesson: ['m02-l7', 'Dismantling, inspecting and reassembling good practice'],
   build: function () {
     var root = h('div', { class: 'asm' });
