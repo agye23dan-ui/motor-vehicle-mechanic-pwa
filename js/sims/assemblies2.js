@@ -1,5 +1,5 @@
 /* More jobs for the Disassemble and assemble studio. Same data format as assemblies.js. */
-import { ASSEMBLIES, R, C, P, T, bolts, doStep, torque } from './assemblies.js';
+import { ASSEMBLIES, WHEELEND, hull, R, C, P, T, bolts, doStep, torque } from './assemblies.js';
 
 var DISC = ASSEMBLIES[0];
 function from(id) { var out = null; DISC.parts.forEach(function (p) { if (p.id === id) out = p; }); return out; }
@@ -24,7 +24,7 @@ export var MORE = [
       { id: 'cap', label: 'Open the radiator cap on the hot engine to see the level', ok: false, why: 'Hot coolant under pressure sprays out and causes severe burns. Always wait until the engine is cold.' }
     ],
     parts: [
-      { id: 'belt', name: 'Drive belt', c: [200, 280], needs: [], svg: P('M262 190L150 295A45 45 0 0 0 150 380L262 242', 'k', 'stroke:var(--ink);stroke-width:8;opacity:0.7') + T(190, 290, 'Belt', 'tsm', 'middle'),
+      { id: 'belt', name: 'Drive belt', c: [205, 275], needs: [], svg: P(hull([[290, 215, 36], [130, 330, 46]]), 'k', 'stroke:var(--ink);stroke-width:8;opacity:0.7') + T(190, 272, 'Belt', 'tsm', 'middle'),
         remove: [doStep('Release the belt tensioner with the breaker bar and slip the belt off', 'breaker')],
         inspect: { label: 'Check the belt for cracks and fraying', limit: 'No cracks or fraying', fail: 'The belt is cracked: replace it.' },
         install: [doStep('Route the belt as in the belt diagram and release the tensioner slowly', 'breaker')] },
@@ -108,23 +108,23 @@ export var MORE = [
       plain(from('wheel')), plain(from('caliper')),
       from('pads') && Object.assign(plain(from('pads')), { }),
       plain(from('carrier')),
-      { id: 'hubnut', name: 'Axle nut', c: [355, 200], needs: ['wheel'], svg: R(344, 186, 22, 28, 'metal-dark') + T(355, 230, 'Axle nut', 'tsm', 'middle'),
+      { id: 'hubnut', name: 'Axle nut', c: [362, 200], needs: ['wheel'], svg: R(350, 186, 24, 28, 'metal-dark') + T(362, 232, 'Axle nut', 'tsm', 'middle'),
         remove: [doStep('Remove the dust cap and the locking device, then the axle nut', 'sock-32')],
         renew: true,
         install: [doStep('Fit a new axle nut', 'sock-32'), torque('Torque the axle nut to its specification', 'sock-32', 250)] },
-      { id: 'disc', name: 'Brake disc', c: [378, 200], needs: ['carrier', 'hubnut'], svg: R(334, 64, 30, 92, 'metal') + R(334, 244, 30, 92, 'metal') + R(364, 152, 58, 96, 'metal') + P('M338 70V150M348 70V150M338 250V330M348 250V330', 'k2'),
+      { id: 'disc', name: 'Brake disc', c: [395, 200], needs: ['carrier', 'hubnut'], svg: WHEELEND.disc,
         remove: [doStep('Pull the disc off the hub', null)],
         install: [doStep('Clean the hub face, then slide the disc on', null)] },
-      { id: 'abssensor', name: 'ABS sensor', c: [447, 262], needs: ['carrier'], svg: R(436, 252, 22, 12, 'tint-m') + P('M458 258H520', 'wire-sig'),
+      { id: 'abssensor', name: 'ABS sensor', c: [460, 261], needs: ['carrier'], svg: R(446, 254, 26, 14, 'tint-m') + P('M472 261H524', 'wire-sig'),
         remove: [doStep('Remove the sensor screw and pull the sensor from its bore', 'sock-10')],
         install: [doStep('Clean the bore and fit the sensor, then tighten the screw', 'sock-10'), torque('Torque the sensor screw', 'sock-10', 8)] },
-      { id: 'hubunit', name: 'Hub unit and bearing', c: [438, 200], needs: ['disc', 'abssensor'], svg: R(422, 150, 32, 100, 'tint-c') + C(438, 200, 16, 'box') + T(438, 270, 'Hub unit', 'tsm', 'middle'),
+      { id: 'hubunit', name: 'Hub unit and bearing', c: [461, 200], needs: ['disc', 'abssensor'], svg: R(440, 146, 42, 108, 'tint-c') + C(461, 200, 16, 'box') + T(461, 282, 'Hub unit', 'tsm', 'middle'),
         remove: [bolts('Remove the four hub unit bolts from behind the knuckle', 'torx-t55', 4, 'circle', [0, 2, 1, 3]), doStep('Free the hub unit from the knuckle with a puller and soft mallet', 'puller')],
         renew: true,
         inspect: { label: 'Check the hub for side play with a dial gauge and spin it by hand', limit: '0.05 mm play, smooth, ABS ring undamaged', fail: 'The bearing is worn or the ABS ring is damaged: replace the hub unit.' },
         install: [doStep('Clean the knuckle bore, then fit the new hub unit square into it', null), bolts('Fit the four hub unit bolts and tighten them in a cross pattern', 'torx-t55', 4, 'circle', [0, 2, 1, 3]), torque('Torque the hub unit bolts', 'torx-t55', 70)] }
     ].filter(Boolean),
-    statics: R(454, 36, 130, 328, 'metal', 6) + T(520, 205, 'Knuckle', 'tsm', 'middle'),
+    statics: WHEELEND.knuckle,
     final: ['Check that the wheel turns freely with no noise', 'Check the ABS sensor air gap and the wheel speed signal on a scan tool', 'Re-torque the wheel nuts after a short test drive', 'Pump the brake pedal until firm before moving the car']
   },
 
@@ -197,7 +197,7 @@ export var MORE = [
       { id: 'wheel', name: 'Wheel', c: [88, 200], needs: [], svg: R(40, 56, 70, 288, 'box tint-c', 8) + T(75, 205, 'Wheel', 'tsm', 'middle'),
         remove: [bolts('Remove the wheel nuts in a star pattern', 'sock-19', 5, 'circle', [0, 2, 4, 1, 3]), doStep('Lift the wheel off', null)],
         install: [doStep('Fit the wheel on the studs', null), bolts('Tighten the wheel nuts in a star pattern', 'sock-19', 5, 'circle', [0, 2, 4, 1, 3]), torque('Final torque with the torque wrench', 'sock-19', 110)] },
-      { id: 'drum', name: 'Brake drum', c: [260, 200], needs: ['wheel'], svg: R(130, 84, 250, 232, 'metal', 14) + C(255, 200, 70, 'k2') + T(255, 205, 'Drum', 'tsm', 'middle'),
+      { id: 'drum', name: 'Brake drum', c: [255, 200], needs: ['wheel'], svg: C(255, 200, 142, 'box') + C(255, 200, 142, 'metal') + C(255, 200, 70, 'k2') + C(255, 200, 16, 'metal-dark') + T(255, 290, 'Brake drum', 'tsm', 'middle'),
         remove: [doStep('Back off the adjuster, then pull the drum off the hub', null)],
         inspect: { label: 'Measure the drum inner diameter with a vernier', limit: '231.0 mm maximum', fail: 'The drum is worn beyond its maximum: replace the drums as a pair.' },
         install: [doStep('Fit the drum over the shoes and shut the adjuster', null)] },
@@ -214,7 +214,7 @@ export var MORE = [
         inspect: { label: 'Peel back the cylinder boots and look for fluid', limit: 'Dry', fail: 'The cylinder is leaking: replace it. Leaking fluid ruins the linings.' },
         install: [bolts('Fit the two cylinder bolts', 'sock-10', 2, [2, 1], [0, 1]), torque('Torque the cylinder bolts', 'sock-10', 10), doStep('Connect the pipe union with the flare-nut spanner', 'flare')] }
     ],
-    statics: C(255, 200, 150, 'metal') + C(255, 200, 16, 'metal-dark') + T(255, 372, 'Backing plate', 'tsm', 'middle'),
+    statics: C(255, 200, 152, 'box') + C(255, 200, 152, 'metal-dark') + C(255, 200, 18, 'metal') + T(255, 372, 'Backing plate', 'tsm', 'middle'),
     final: ['Bleed the brake system if the pipe was opened', 'Adjust the shoes and test the handbrake', 'Pump the brake pedal until firm before moving the car', 'Re-torque the wheel nuts after a short test drive']
   }
 ];
