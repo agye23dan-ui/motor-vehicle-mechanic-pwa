@@ -1,0 +1,51 @@
+/* Simulation studio */
+.studio-grid { grid-template-columns: 1fr; }
+@media (min-width: 760px) { .studio-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (min-width: 1250px) { .studio-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.sim-card { text-decoration: none; color: var(--ink); align-content: start; margin-bottom: 0; }
+.sim-card:hover { background: var(--tint-key); }
+.sim-card .go { display: inline-flex; align-items: center; gap: 0.3rem; font-weight: 800; margin-top: 0.4rem; }
+.sim-icon { width: 3rem; height: 3rem; display: grid; place-items: center; border-radius: var(--radius); background: var(--tint-cyan); }
+.sim-layout { display: grid; gap: 1.2rem; align-items: start; }
+@media (min-width: 980px) { .sim-layout { grid-template-columns: minmax(0, 1fr) 21rem; } .sim-side { position: sticky; top: 1rem; } }
+.sim-main, .sim-side { min-width: 0; }
+.sim-side { padding: 1rem 1.1rem; border: 1px solid var(--rule); border-radius: var(--radius); background: var(--sheet); }
+.sim-side h3, .sim-main h3 { font-size: 1.05rem; margin: 0 0 0.5rem; }
+.sim-figure { border: 1px solid var(--rule); border-radius: var(--radius); background: var(--sheet); padding: 0.6rem; }
+.sim-figure .dg { max-height: 26rem; }
+.sim-ctl { display: grid; gap: 0.3rem; margin-bottom: 0.9rem; }
+.sim-ctl label { display: flex; justify-content: space-between; gap: 0.6rem; font-weight: 700; }
+.sim-val { font-weight: 800; font-variant-numeric: tabular-nums; }
+.sim-ctl input[type="range"] { width: 100%; accent-color: var(--ink); }
+.sim-ctl select { min-height: 2.6rem; padding: 0 0.6rem; border: 1.5px solid var(--ink); border-radius: var(--radius); background: var(--paper); color: var(--ink); font: inherit; width: 100%; }
+.sim-check { display: flex; align-items: center; gap: 0.6rem; }
+.sim-check input { width: 1.3rem; height: 1.3rem; accent-color: var(--ink); }
+.sim-read { margin: 0.8rem 0; }
+.sim-note { margin: 0.6rem 0; font-weight: 700; }
+.sim-table { width: 100%; border-collapse: collapse; margin-top: 0.4rem; }
+.sim-table th { text-align: left; padding: 0.45rem 0.5rem 0.45rem 0; font-weight: 700; }
+.sim-table td { padding: 0.45rem 0.5rem; vertical-align: top; }
+.sim-table tr { border-top: 1px solid var(--rule); }
+.sim-try { margin-top: 1.2rem; padding-top: 0.8rem; border-top: 1px solid var(--rule); }
+.sim-try ol { margin: 0; padding-left: 1.2rem; display: grid; gap: 0.4rem; font-size: 0.95rem; }
+.sim-warns { display: grid; gap: 0.5rem; }
+.sim-warns .note { margin: 0; }
+
+/* Diagnosis cases */
+.case-row { width: 100%; text-align: left; background: none; border-left: 0; border-right: 0; border-top: 0; font: inherit; cursor: pointer; }
+.case-stars { font-size: 1.1rem; letter-spacing: 0.1em; white-space: nowrap; }
+.case-grid { display: grid; gap: 1.4rem; margin-top: 1rem; }
+@media (min-width: 900px) { .case-grid { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: start; } }
+.case-group { margin-bottom: 0.8rem; }
+.case-group h4 { margin: 0 0 0.3rem; font-size: 0.85rem; letter-spacing: 0.05em; text-transform: uppercase; color: var(--ink-2); }
+.case-test { display: flex; width: 100%; justify-content: space-between; gap: 0.8rem; text-align: left; margin-bottom: 0.35rem; }
+.case-test.used { opacity: 0.5; }
+.case-test .mins { color: var(--ink-2); font-weight: 600; white-space: nowrap; }
+.case-journal { margin: 0.6rem 0 1.2rem; padding-left: 1.3rem; display: grid; gap: 0.7rem; }
+.case-journal p { margin: 0.2rem 0 0; }
+.sim-timer { font-weight: 800; margin: 0.2rem 0; }
+.case-cause { display: flex; align-items: center; gap: 0.6rem; padding: 0.6rem 0.8rem; border: 1.5px solid var(--rule); border-radius: var(--radius); margin-bottom: 0.4rem; background: var(--sheet); }
+.case-cause input { width: 1.2rem; height: 1.2rem; accent-color: var(--ink); }
+.case-cause label { flex: 1; cursor: pointer; }
+.case-result { margin-top: 1rem; }
+.case-score { font-size: 1.3rem; font-weight: 800; }

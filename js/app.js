@@ -12,6 +12,7 @@ import * as exam from './views/exam.js';
 import * as cards from './views/cards.js';
 import * as faults from './views/faults.js';
 import * as tools from './views/tools.js';
+import * as studio from './views/studio.js';
 import * as study from './views/study.js';
 import * as progress from './views/progress.js';
 import * as settings from './views/settings.js';
@@ -41,13 +42,15 @@ var ROUTES = [
   [/^saved$/, 'learn', function () { return study.saved(); }],
   [/^logbook$/, 'learn', function () { return mod.logbook(); }],
   [/^plan$/, 'learn', function () { return study.plan(); }],
-  [/^tools$/, 'tools', function () { return tools.render(); }],
+  [/^studio$/, 'studio', function () { return studio.hub(); }],
+  [/^studio\/([a-z-]+)$/, 'studio', function (p) { return studio.sim(p); }],
+  [/^tools$/, 'studio', function () { return tools.render(); }],
   [/^progress$/, 'progress', function () { return progress.render(); }],
   [/^settings$/, 'settings', function () { return settings.render(); }],
   [/^about$/, 'settings', function () { return settings.about(); }]
 ];
 
-var TABS = [['learn', 'Learn', 'learn'], ['quiz', 'Quiz', 'quiz'], ['cards', 'Cards', 'cards'], ['faults', 'Faults', 'wrench'], ['tools', 'Tools', 'calc'], ['progress', 'Progress', 'progress']];
+var TABS = [['learn', 'Learn', 'learn'], ['quiz', 'Quiz', 'quiz'], ['cards', 'Cards', 'cards'], ['faults', 'Faults', 'wrench'], ['studio', 'Studio', 'calc'], ['progress', 'Progress', 'progress']];
 
 function buildChrome() {
   var top = document.getElementById('topbar');
@@ -110,7 +113,7 @@ function show() {
   }
   markTab(match.tab);
   drawRail(match.tab, path);
-  main.classList.toggle('wide', match.tab === 'faults' || match.tab === 'tools' || match.tab === 'learn' && (!match.params.length || /^module\/[^/]+(\/lesson\/\d+)?$/.test(path)));
+  main.classList.toggle('wide', match.tab === 'faults' || match.tab === 'studio' || match.tab === 'learn' && (!match.params.length || /^module\/[^/]+(\/lesson\/\d+)?$/.test(path)));
   var node;
   try { node = match.fn(match.params); } catch (e) { console.error(e); node = failure(e); }
   current = node;

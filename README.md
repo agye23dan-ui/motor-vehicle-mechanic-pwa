@@ -5,6 +5,8 @@ Vanilla JavaScript, no framework, no runtime dependencies, no accounts. Progress
 
 **Content:** 21 modules in three semesters, 224 lessons (about 153,000 words, 19 hours of reading), 21 practical task sheets with instructor sign-off, 1,216 quiz questions with explanations, 930 flashcards, 68 drawn diagrams, a fault finder with 70 faults (causes, diagnosis, repair), 9 workshop calculators, and a 40-question timed exam (60 min, pass mark 70%).
 
+**Simulation studio:** a circuit lab (series, parallel, faults and voltage-drop readings), 10 diagnosis cases (choose tests, find the hidden fault, earn stars), a brake simulator (force path, ABS, fade, fluid boil) and an A/C gauge simulator, plus the calculators.
+
 **Study tools:** full-course search, bookmarks and personal notes per lesson, a 15-week study plan per semester, a practical logbook (printable), and spaced-repetition flashcards.
 
 **Syllabus basis:** the module structure follows the Red Seal Automotive Service Technician occupational standard (blocks A to H), cross-checked against the Australian AUR30620 and UK City & Guilds 4290-13 qualification outlines. All text is original. Local practice, units and regulations in Ghana are not the Red Seal's, so ask your trainer where they differ.

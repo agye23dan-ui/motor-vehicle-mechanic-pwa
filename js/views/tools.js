@@ -1,5 +1,5 @@
 import { h } from '../dom.js';
-import { pageHead, setTitle } from '../ui.js';
+import { crumb, pageHead, setTitle } from '../ui.js';
 
 /* Workshop calculators. Each one works out its answer as you type, using the same formulas as the lessons. */
 
@@ -198,7 +198,7 @@ function card(t) {
 
 export function render() {
   setTitle('Workshop tools');
-  return h('div', { class: 'tools-page' },
+  return h('div', { class: 'tools-page' }, crumb('#/studio', 'Studio'),
     pageHead('Workshop tools', 'Calculators that use the formulas from the lessons. They are for learning and quick checks. For real work, use the figures in the manufacturer’s workshop manual.'),
     h('div', { class: 'tool-grid' }, TOOLS.map(card)));
 }
