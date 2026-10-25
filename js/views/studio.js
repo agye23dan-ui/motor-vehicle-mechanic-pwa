@@ -5,10 +5,17 @@ import circuit from '../sims/circuit.js';
 import cases from '../sims/cases.js';
 import aircon from '../sims/aircon.js';
 import brakes from '../sims/brakes.js';
+import engine from '../sims/engine.js';
+import scope from '../sims/scope.js';
+import scantool from '../sims/scantool.js';
+import cooling from '../sims/cooling.js';
+import charging from '../sims/charging.js';
+import gearbox from '../sims/gearbox.js';
+import alignment from '../sims/alignment.js';
 
 /* Simulation studio: interactive models that let you change a system and watch it respond. */
 
-var SIMS = [circuit, cases, brakes, aircon];
+var SIMS = [cases, circuit, scantool, scope, engine, cooling, charging, brakes, gearbox, alignment, aircon];
 
 function lessonHref(id) {
   var m = /^(m\d+)-l(\d+)$/.exec(id);
@@ -35,8 +42,11 @@ export function sim(params) {
   SIMS.forEach(function (x) { if (x.id === params[0]) s = x; });
   if (!s) return h('div', null, crumb('#/studio', 'Studio'), h('p', { class: 'empty' }, 'That simulation was not found.'));
   setTitle(s.title);
-  return h('div', { class: 'studio-page' }, crumb('#/studio', 'Studio'),
+  var page = h('div', { class: 'studio-page' }, crumb('#/studio', 'Studio'),
     h('div', { class: 'page-head' }, h('h1', null, s.title), h('p', null, s.blurb),
       s.lesson ? h('p', { class: 'small' }, 'Related lesson: ', h('a', { href: lessonHref(s.lesson[0]) }, s.lesson[1])) : null),
     s.build());
+  var inner = page.lastElementChild;
+  page.destroy = function () { if (inner && inner.destroy) inner.destroy(); };
+  return page;
 }
