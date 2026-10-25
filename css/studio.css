@@ -117,3 +117,14 @@
 .asm-svg text { paint-order: stroke; stroke: var(--paper); stroke-width: 3.5px; stroke-linejoin: round; }
 .asm-svg .asm-part:hover text { stroke: var(--paper); }
 .asm-part.hl { filter: brightness(1.12) drop-shadow(0 0 4px var(--cyan)); }
+
+/* Whole vehicle workshop */
+.veh-svg { max-height: 40rem; }
+.veh-svg text { paint-order: stroke; stroke: var(--paper); stroke-width: 3.5px; stroke-linejoin: round; }
+.veh-part { cursor: grab; transition: transform 0.45s cubic-bezier(0.4, 0, 0.2, 1); transform-box: fill-box; transform-origin: center; outline: none; }
+.veh-part:hover, .veh-part:focus-visible { filter: brightness(1.1) drop-shadow(0 0 3px var(--cyan)); }
+.veh-part.dragging { cursor: grabbing; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.35)); }
+.veh-part.hl { filter: brightness(1.12) drop-shadow(0 0 4px var(--cyan)); }
+.veh-part.loose { filter: drop-shadow(0 0 5px var(--yellow)); }
+.veh-ghost { fill: none; stroke: var(--ink-3); stroke-width: 1.5; stroke-dasharray: 6 5; opacity: 0.5; pointer-events: none; }
+.veh-ghost.on { stroke: var(--magenta-ink); stroke-width: 2.5; opacity: 1; }

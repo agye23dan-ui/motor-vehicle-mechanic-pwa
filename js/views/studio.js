@@ -13,10 +13,11 @@ import charging from '../sims/charging.js';
 import gearbox from '../sims/gearbox.js';
 import alignment from '../sims/alignment.js';
 import assemble from '../sims/assemble.js';
+import vehicle from '../sims/vehicle.js';
 
 /* Simulation studio: interactive models that let you change a system and watch it respond. */
 
-var SIMS = [assemble, cases, circuit, scantool, scope, engine, cooling, charging, brakes, gearbox, alignment, aircon];
+var SIMS = [vehicle, assemble, cases, circuit, scantool, scope, engine, cooling, charging, brakes, gearbox, alignment, aircon];
 
 function lessonHref(id) {
   var m = /^(m\d+)-l(\d+)$/.exec(id);
