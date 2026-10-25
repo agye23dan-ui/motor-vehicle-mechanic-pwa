@@ -50,7 +50,7 @@ function boltPositions(n, layout) {
 
 function buildSvg(asm) {
   var parts = asm.parts.slice().reverse().map(function (p) {
-    return '<g class="asm-part" data-id="' + p.id + '" tabindex="0" role="button" aria-label="' + p.name + '">' + p.svg + '</g>';
+    return '<g class="asm-part" data-id="' + p.id + '" tabindex="0" role="button" aria-label="' + p.name + '"><title>' + p.name + '</title>' + p.svg + '</g>';
   }).join('');
   return '<svg xmlns="http://www.w3.org/2000/svg" class="dg asm-svg" viewBox="0 0 640 480" role="group" aria-label="' + asm.title + '"><title>' + asm.title + '</title>' +
     '<rect x="14" y="390" width="612" height="84" rx="6" class="tint-y-soft"/><text x="614" y="406" class="tsm" text-anchor="end">Workbench</text>' +

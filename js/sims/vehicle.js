@@ -87,7 +87,7 @@ function build(kind, onExit) {
   };
   PARTS.forEach(function (p) { st.installed[p.id] = strip; });
 
-  var gparts = PARTS.slice().reverse().map(function (p) { return '<g class="veh-part" data-id="' + p.id + '" tabindex="0" role="button" aria-label="' + p.name + '" style="touch-action:none">' + p.svg + '</g>'; }).join('');
+  var gparts = PARTS.slice().reverse().map(function (p) { return '<g class="veh-part" data-id="' + p.id + '" tabindex="0" role="button" aria-label="' + p.name + '" style="touch-action:none"><title>' + p.name + '</title>' + p.svg + '</g>'; }).join('');
   var svgEl = svgFromString('<svg xmlns="http://www.w3.org/2000/svg" class="dg veh-svg" viewBox="0 0 940 520" role="group" aria-label="Car frame and workbench"><title>Car frame and workbench</title>' +
     '<defs><marker id="ar" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M1 1.5 9 5 1 8.5z" class="head"/></marker></defs>' +
     '<rect x="14" y="432" width="912" height="80" rx="6" class="tint-y-soft"/><text x="916" y="448" class="tsm" text-anchor="end">Workbench: drop removed parts here</text>' +
@@ -144,6 +144,7 @@ function build(kind, onExit) {
       g.classList.add('on-bench');
     }
     g.classList.toggle('loose', st.loose === id);
+    var tt = g.querySelector('title'); if (tt) tt.textContent = BY[id].name + (st.installed[id] ? (strip ? ': drag it onto the bench' : '') : ': drag it onto the car');
   }
   function assignSlots() {
     var n = 0;
