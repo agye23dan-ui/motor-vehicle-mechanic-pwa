@@ -1,0 +1,11 @@
+import './general.js';
+import './engine.js';
+import './fuel.js';
+import './electrical.js';
+import './climate.js';
+import './driveline.js';
+import './chassis.js';
+import './extra.js';
+import './extra2.js';
+import './extra3.js';
+export { hasDiagram, diagram } from './core.js';
