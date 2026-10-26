@@ -128,3 +128,17 @@
 .veh-part.loose { filter: drop-shadow(0 0 5px var(--yellow)); }
 .veh-ghost { fill: none; stroke: var(--ink-3); stroke-width: 1.5; stroke-dasharray: 6 5; opacity: 0.5; pointer-events: none; }
 .veh-ghost.on { stroke: var(--magenta-ink); stroke-width: 2.5; opacity: 1; }
+
+/* The drawing stays put while the parts and tools scroll beside or under it */
+.asm-layout .sim-main { position: sticky; top: var(--top-h); z-index: 5; background: var(--paper); padding-bottom: 0.4rem; align-self: start; }
+.asm-layout .asm-svg, .asm-layout .veh-svg { max-height: 38vh; }
+.asm-layout .asm-log { max-height: 7.5rem; overflow: hidden; }
+.asm-layout .asm-msg { padding: 0.35rem 0.7rem; font-size: 0.9rem; }
+.asm-layout .asm-msg:nth-child(n+3) { display: none; }
+@media (min-width: 880px) {
+  .asm-layout .sim-main { top: 0.5rem; }
+}
+@media (min-width: 980px) {
+  .asm-layout .asm-svg, .asm-layout .veh-svg { max-height: calc(100vh - 16rem); }
+  .asm-layout > .asm-side { position: sticky; top: 0.5rem; max-height: calc(100vh - 1rem); overflow-y: auto; align-self: start; padding-right: 0.3rem; }
+}
