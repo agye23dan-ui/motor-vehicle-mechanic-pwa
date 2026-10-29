@@ -12,7 +12,7 @@ export function T(x, y, s, cls, a) { return '<text x="' + x + '" y="' + y + '" c
 
 /* A rectangle with its own paint, for parts that need real colours (rubber, friction lining, red caliper paint). */
 export function RS(x, y, w, h, st, rx) { return '<rect x="' + x + '" y="' + y + '" width="' + w + '" height="' + h + '" rx="' + (rx || 0) + '" style="' + st + '"/>'; }
-var STEEL = 'fill:url(#shMetal);stroke:#59626b;stroke-width:1.2', DARK = 'fill:url(#shDark);stroke:#1f2327;stroke-width:1.2', RED = 'fill:url(#shRed);stroke:#5a1510;stroke-width:1.4', RUBBER = 'fill:#1d2024;stroke:#0a0b0d;stroke-width:1.4', LINING = 'fill:#3b3834;stroke:#14110f;stroke-width:1.2';
+export var STEEL = 'fill:url(#shMetal);stroke:#59626b;stroke-width:1.2', DARK = 'fill:url(#shDark);stroke:#1f2327;stroke-width:1.2', RED = 'fill:url(#shRed);stroke:#5a1510;stroke-width:1.4', RUBBER = 'fill:#1d2024;stroke:#0a0b0d;stroke-width:1.4', LINING = 'fill:#3b3834;stroke:#14110f;stroke-width:1.2';
 
 /* Shared side view of a front wheel end: wheel, caliper and pads at the top, carrier at the bottom, disc on the hub. */
 export var WHEELEND = {
@@ -122,31 +122,31 @@ export var ASSEMBLIES = [
       { id: 'warm', label: 'Remove the head while the engine is warm so the bolts come out easily', ok: false, why: 'A warm aluminium head can warp when bolts are loosened. Always work on a cold engine.' }
     ],
     parts: [
-      { id: 'valvecover', name: 'Valve cover', c: [320, 125], needs: [], svg: R(170, 100, 300, 50, 'metal') + R(176, 94, 8, 10, 'metal-dark') + R(456, 94, 8, 10, 'metal-dark') + T(320, 130, 'Valve cover', 'tsm', 'middle'),
+      { id: 'valvecover', name: 'Valve cover', c: [320, 125], needs: [], svg: RS(170, 100, 300, 50, DARK, 8) + P('M186 112H454M186 124H454M186 136H454', 'k2', 'stroke:#8d96a0;stroke-width:1;opacity:0.5') + RS(204, 91, 30, 11, RED, 3) + P('M210 93V100M218 93V100M226 93V100', 'k2', 'stroke:#fff;stroke-width:1') + RS(176, 94, 8, 10, STEEL, 2) + RS(300, 94, 8, 10, STEEL, 2) + RS(456, 94, 8, 10, STEEL, 2) + T(320, 130, 'Valve cover', 'tsm', 'middle'),
         remove: [bolts('Loosen the valve cover bolts from the outside inward', 'sock-10', 8, [4, 2], [0, 4, 3, 7, 1, 5, 2, 6]), doStep('Lift off the cover and the gasket', null)],
         renew: true,
         install: [doStep('Clean the faces and fit the new gasket', null), bolts('Tighten the cover bolts from the centre outward', 'sock-10', 8, [4, 2], [1, 5, 2, 6, 0, 4, 3, 7]), torque('Torque the cover bolts', 'sock-10', 8)] },
-      { id: 'timingbelt', name: 'Timing belt', c: [115, 247], needs: [], svg: P(hull([[130, 172, 28], [130, 322, 20]]), 'k', 'stroke:var(--yellow-ink);stroke-width:9;opacity:0.85') + T(84, 250, 'Belt', 'tsm', 'middle'),
+      { id: 'timingbelt', name: 'Timing belt', c: [115, 247], needs: [], svg: P(hull([[130, 172, 28], [130, 322, 20]]), 'k', 'stroke:#15171a;stroke-width:9') + P(hull([[130, 172, 28], [130, 322, 20]]), 'k2', 'stroke:#7a828a;stroke-width:9;stroke-dasharray:1.6 3.2;opacity:0.7') + T(84, 250, 'Belt', 'tsm', 'middle'),
         remove: [doStep('Turn the engine to top centre on cylinder 1 and lock the crankshaft and camshaft with the timing tools', 'lock'), doStep('Release the belt tensioner and slide the belt off', 'sock-13')],
         renew: true,
         install: [doStep('Fit the new belt, keeping it tight on the drive side, with the engine still locked at top centre', null), torque('Set the tensioner to its torque', 'sock-13', 25), doStep('Remove the locking tools, turn the engine two full turns by hand and recheck the timing marks', null)] },
-      { id: 'camshaft', name: 'Camshaft and caps', c: [300, 178], needs: ['valvecover', 'timingbelt'], svg: R(150, 170, 300, 20, 'tint-c') + R(210, 156, 28, 44, 'metal-dark') + R(300, 156, 28, 44, 'metal-dark') + R(390, 156, 28, 44, 'metal-dark') + T(320, 150, 'Camshaft', 'tsm', 'middle'),
+      { id: 'camshaft', name: 'Camshaft and caps', c: [300, 178], needs: ['valvecover', 'timingbelt'], svg: RS(150, 172, 300, 16, STEEL, 5) + RS(176, 160, 20, 40, STEEL, 9) + RS(250, 160, 20, 40, STEEL, 9) + RS(344, 160, 20, 40, STEEL, 9) + RS(210, 156, 28, 44, DARK, 3) + RS(300, 156, 28, 44, DARK, 3) + RS(390, 156, 28, 44, DARK, 3) + C(224, 150, 3, 'metal') + C(314, 150, 3, 'metal') + C(404, 150, 3, 'metal') + T(320, 150, 'Camshaft', 'tsm', 'middle'),
         remove: [bolts('Loosen the bearing cap bolts gradually, outside caps first, alternating', 'sock-10', 8, [4, 2], [0, 4, 3, 7, 1, 5, 2, 6]), doStep('Lift out the camshaft and keep the caps in order', null)],
         install: [doStep('Oil the journals, lay the camshaft in with the lobes of cylinder 1 correct and fit the caps in their original places', null), bolts('Tighten the cap bolts gradually from the centre outward', 'sock-10', 8, [4, 2], [1, 5, 2, 6, 0, 4, 3, 7]), torque('Torque the cap bolts', 'sock-10', 12)] },
-      { id: 'headbolts', name: 'Cylinder head bolts', c: [320, 240], needs: ['camshaft'], svg: R(190, 200, 8, 78, 'metal-dark') + R(255, 200, 8, 78, 'metal-dark') + R(320, 200, 8, 78, 'metal-dark') + R(385, 200, 8, 78, 'metal-dark') + R(450, 200, 8, 78, 'metal-dark'),
+      { id: 'headbolts', name: 'Cylinder head bolts', c: [320, 240], needs: ['camshaft'], svg: RS(190, 200, 8, 78, STEEL, 2) + RS(186, 193, 16, 9, DARK, 2) + RS(255, 200, 8, 78, STEEL, 2) + RS(251, 193, 16, 9, DARK, 2) + RS(320, 200, 8, 78, STEEL, 2) + RS(316, 193, 16, 9, DARK, 2) + RS(385, 200, 8, 78, STEEL, 2) + RS(381, 193, 16, 9, DARK, 2) + RS(450, 200, 8, 78, STEEL, 2) + RS(446, 193, 16, 9, DARK, 2),
         remove: [bolts('Loosen all the head bolts in the reverse of the tightening sequence', 'torx-t55', 10, [5, 2], [5, 0, 9, 4, 6, 1, 8, 3, 7, 2])],
         renew: true,
         install: [bolts('Run the new head bolts in and tighten them in the tightening sequence, from the centre outward', 'torx-t55', 10, [5, 2], [2, 7, 3, 8, 1, 6, 4, 9, 0, 5]), torque('Stage 1: all bolts in sequence', 'torx-t55', 30), torque('Stage 2: all bolts in sequence', 'torx-t55', 60), torque('Stage 3: turn each bolt a further angle', 'torx-t55', 90, 'degrees'), torque('Stage 4: turn each bolt a further angle', 'torx-t55', 90, 'degrees')] },
-      { id: 'head', name: 'Cylinder head', c: [320, 241], needs: ['headbolts'], svg: R(150, 200, 340, 82, 'metal') + T(320, 270, 'Cylinder head', 'tsm', 'middle'),
+      { id: 'head', name: 'Cylinder head', c: [320, 241], needs: ['headbolts'], svg: RS(150, 200, 340, 82, STEEL, 7) + RS(168, 214, 70, 38, 'fill:#7fc4e8;fill-opacity:0.35;stroke:#4a8fb3;stroke-width:1', 9) + RS(268, 214, 70, 38, 'fill:#7fc4e8;fill-opacity:0.35;stroke:#4a8fb3;stroke-width:1', 9) + RS(368, 214, 70, 38, 'fill:#7fc4e8;fill-opacity:0.35;stroke:#4a8fb3;stroke-width:1', 9) + RS(150, 256, 16, 20, 'fill:#1b1e22;stroke:#050607', 3) + RS(474, 256, 16, 20, 'fill:#1b1e22;stroke:#050607', 3) + P('M170 280Q200 266 230 280M270 280Q300 266 330 280M370 280Q400 266 430 280', 'k2', 'stroke:#59626b;stroke-width:2') + T(320, 276, 'Cylinder head', 'tsm', 'middle'),
         remove: [doStep('Lift the head straight up with an assistant. Do not lever against the gasket faces.', null)],
         inspect: { label: 'Check the head face for flatness with a straight edge and feeler gauges', limit: '0.05 mm maximum', fail: 'The head is warped beyond 0.05 mm: send it to a machine shop to be resurfaced, or replace it.' },
         install: [doStep('Fit the dowels, then lower the head straight down onto the gasket with an assistant', null)] },
-      { id: 'headgasket', name: 'Head gasket', c: [320, 287], needs: ['head'], svg: R(150, 282, 340, 10, 'tint-y'),
+      { id: 'headgasket', name: 'Head gasket', c: [320, 287], needs: ['head'], svg: RS(150, 282, 340, 10, STEEL, 2) + RS(170, 283, 48, 8, 'fill:#14110f', 3) + RS(250, 283, 48, 8, 'fill:#14110f', 3) + RS(330, 283, 48, 8, 'fill:#14110f', 3) + RS(410, 283, 48, 8, 'fill:#14110f', 3) + P('M154 287H486', 'k2', 'stroke:#b8bec4;stroke-width:1'),
         remove: [doStep('Lift off the old gasket and clean both faces with a plastic scraper, taking care not to scratch them', null)],
         renew: true,
         install: [doStep('Lay the new gasket on the block with its TOP mark upward and over the dowels', null)] }
     ],
-    statics: R(150, 292, 340, 88, 'metal') + T(320, 340, 'Engine block', 'tsm', 'middle') + C(130, 172, 28, 'metal-dark') + C(130, 172, 8, 'box') + C(130, 322, 20, 'metal-dark') + C(130, 322, 6, 'box'),
+    statics: RS(150, 292, 340, 88, DARK, 8) + RS(166, 300, 60, 72, 'fill:#0f1114;stroke:#3a4047', 6) + RS(248, 300, 60, 72, 'fill:#0f1114;stroke:#3a4047', 6) + RS(330, 300, 60, 72, 'fill:#0f1114;stroke:#3a4047', 6) + RS(412, 300, 60, 72, 'fill:#0f1114;stroke:#3a4047', 6) + RS(172, 308, 48, 20, STEEL, 4) + RS(254, 330, 48, 20, STEEL, 4) + RS(336, 330, 48, 20, STEEL, 4) + RS(418, 308, 48, 20, STEEL, 4) + T(320, 375, 'Engine block', 'tsm', 'middle') + C(130, 172, 28, 'metal-dark') + C(130, 172, 24, 'k2') + C(130, 172, 8, 'box') + C(130, 322, 20, 'metal-dark') + C(130, 322, 16, 'k2') + C(130, 322, 6, 'box'),
     final: ['Refill the cooling system and bleed the air out', 'Reconnect the battery and check there are no oil or coolant leaks', 'Run the engine to temperature and check again', 'Re-check the oil and coolant levels after the first drive']
   },
 
@@ -166,28 +166,28 @@ export var ASSEMBLIES = [
       { id: 'air', label: 'Blow the clutch dust off with compressed air', ok: false, why: 'Old clutch dust can contain harmful fibres. Never blow it with air. Use a damp cloth or an approved vacuum.' }
     ],
     parts: [
-      { id: 'cover', name: 'Pressure plate', c: [345, 200], needs: [], svg: R(310, 84, 70, 232, 'metal') + P('M316 112L366 200L316 288', 'k2') + R(300, 92, 12, 10, 'metal-dark') + R(300, 298, 12, 10, 'metal-dark') + T(345, 338, 'Pressure plate', 'tsm', 'middle'),
+      { id: 'cover', name: 'Pressure plate', c: [345, 200], needs: [], svg: RS(312, 84, 68, 232, STEEL, 9) + RS(326, 100, 38, 200, 'fill:#8b949d;stroke:#59626b', 4) + P('M328 122L360 200L328 278', 'k2', 'stroke:#2a2f35;stroke-width:3') + RS(300, 92, 12, 10, DARK, 2) + RS(300, 298, 12, 10, DARK, 2) + T(345, 338, 'Pressure plate', 'tsm', 'middle'),
         remove: [bolts('Slacken the six pressure plate bolts gradually in a star pattern', 'sock-10', 6, 'circle', [0, 3, 1, 4, 2, 5]), doStep('Lift the pressure plate off the dowels', null)],
         inspect: { label: 'Check the pressure plate for cracks, burn marks and diaphragm finger wear', limit: 'Even surface, no cracks or blue marks', fail: 'The pressure plate is worn or heat-marked: replace it as part of the clutch kit.' },
         install: [doStep('Offer the pressure plate on to the dowels, with the disc centred by the alignment tool', 'align'), bolts('Run the bolts in and tighten them gradually in a star pattern', 'sock-10', 6, 'circle', [0, 3, 1, 4, 2, 5]), torque('Final torque with the torque wrench', 'sock-10', 25)] },
-      { id: 'disc', name: 'Clutch disc', c: [285, 200], needs: ['cover'], svg: R(262, 100, 20, 200, 'tint-y') + R(282, 186, 28, 28, 'metal-dark') + T(272, 318, 'Disc', 'tsm', 'middle'),
+      { id: 'disc', name: 'Clutch disc', c: [285, 200], needs: ['cover'], svg: RS(268, 100, 8, 200, STEEL, 2) + RS(262, 100, 6, 200, LINING, 2) + RS(276, 100, 6, 200, LINING, 2) + RS(282, 186, 28, 28, DARK, 4) + P('M285 192H307M285 200H307M285 208H307', 'k2', 'stroke:#cfd4da;stroke-width:1') + C(272, 120, 2, 'metal') + C(272, 180, 2, 'metal') + C(272, 220, 2, 'metal') + C(272, 280, 2, 'metal') + T(272, 318, 'Disc', 'tsm', 'middle'),
         remove: [doStep('Slide out the clutch disc and note which way round it was fitted', null)],
         inspect: { label: 'Measure the lining depth above the rivets', limit: '0.5 mm minimum', fail: 'The lining is worn below the minimum: replace the disc.' },
         install: [doStep('Place the disc with the side marked "flywheel side" toward the flywheel and centre it with the alignment tool', 'align')] },
-      { id: 'pilot', name: 'Pilot bearing', c: [243, 200], needs: ['disc'], svg: R(228, 190, 30, 20, 'tint-c') + C(243, 200, 4, 'box') + T(243, 180, 'Pilot', 'tsm', 'middle'),
+      { id: 'pilot', name: 'Pilot bearing', c: [243, 200], needs: ['disc'], svg: RS(228, 190, 30, 20, STEEL, 4) + C(243, 200, 5, 'metal-dark') + C(243, 200, 2, 'box') + T(243, 180, 'Pilot', 'tsm', 'middle'),
         remove: [doStep('Pull the pilot bearing out of the crankshaft end', 'puller')],
         inspect: { label: 'Spin the pilot bearing and check for roughness', limit: 'Smooth, no noise or play', fail: 'The bearing is rough: replace it.' },
         install: [doStep('Press the bearing into the crankshaft end until it is flush', null)] },
-      { id: 'flywheel', name: 'Flywheel', c: [210, 200], needs: ['pilot'], svg: R(170, 90, 80, 220, 'metal') + P('M172 98h76M172 302h76', 'k2') + R(176, 108, 6, 10, 'metal-dark') + R(176, 282, 6, 10, 'metal-dark') + T(210, 338, 'Flywheel', 'tsm', 'middle'),
+      { id: 'flywheel', name: 'Flywheel', c: [210, 200], needs: ['pilot'], svg: RS(170, 90, 80, 220, STEEL, 7) + RS(240, 92, 10, 216, 'fill:#d8dde2;stroke:#59626b', 2) + RS(176, 84, 68, 8, DARK, 2) + RS(176, 308, 68, 8, DARK, 2) + P('M178 88H242M178 312H242', 'k2', 'stroke:#cfd4da;stroke-width:5;stroke-dasharray:2 3') + RS(176, 108, 6, 10, DARK, 2) + RS(176, 282, 6, 10, DARK, 2) + T(210, 338, 'Flywheel', 'tsm', 'middle'),
         remove: [doStep('Lock the flywheel with the locking tool', 'lock'), bolts('Remove the eight flywheel bolts gradually in a criss-cross sequence', 'sock-17', 8, 'circle', [0, 4, 2, 6, 1, 5, 3, 7]), doStep('Lift off the flywheel. It is heavy: support it.', null)],
         inspect: { label: 'Check the friction face for heat spots and measure the runout', limit: '0.10 mm maximum runout', fail: 'The flywheel face is damaged or out of limit: resurface or replace it.' },
         install: [doStep('Fit the flywheel on the dowel and lock it with the locking tool', 'lock'), bolts('Run the new bolts in and tighten them in a criss-cross sequence', 'sock-17', 8, 'circle', [0, 4, 2, 6, 1, 5, 3, 7]), torque('Final torque with the torque wrench', 'sock-17', 95)] },
-      { id: 'seal', name: 'Rear main seal', c: [150, 200], needs: ['flywheel'], svg: R(132, 150, 38, 100, 'tint-m') + T(150, 270, 'Seal', 'tsm', 'middle'),
+      { id: 'seal', name: 'Rear main seal', c: [150, 200], needs: ['flywheel'], svg: RS(132, 150, 38, 100, 'fill:#15171a;stroke:#050607', 5) + RS(138, 196, 26, 8, STEEL, 3) + P('M136 156V244', 'k2', 'stroke:#4a5158;stroke-width:2') + T(150, 270, 'Seal', 'tsm', 'middle'),
         remove: [doStep('Carefully pull the rear crankshaft seal out of its housing', 'puller')],
         inspect: { label: 'Look for oil leaking from the rear crankshaft seal', limit: 'Dry', fail: 'The seal is leaking oil: replace it, since oil on the clutch will make it slip.' },
         install: [doStep('Fit the new seal squarely, dry on the sealing lip, and press it in evenly', null)] }
     ],
-    statics: R(30, 70, 100, 240, 'metal') + R(130, 176, 40, 48, 'metal-dark') + T(80, 195, 'Engine rear', 'tsm', 'middle'),
+    statics: RS(30, 70, 100, 240, DARK, 8) + P('M44 90V290M62 90V290', 'k2', 'stroke:#8d96a0;stroke-width:1;opacity:0.45') + RS(130, 176, 40, 48, STEEL, 5) + C(150, 200, 6, 'metal-dark') + T(80, 195, 'Engine rear', 'tsm', 'middle'),
     final: ['Check that the clutch disc turns freely and is centred', 'Refit the gearbox with the input shaft lightly greased on the splines only', 'Bleed or adjust the clutch release system', 'Test the clutch pedal travel and the gear change before handing the car back']
   },
 
@@ -208,22 +208,22 @@ export var ASSEMBLIES = [
       { id: 'live', label: 'Leave the battery connected so you can test it as you work', ok: false, why: 'The B+ cable is live all the time, even with the engine off. A spanner touching the body will weld and burn. Always disconnect the battery earth first.' }
     ],
     parts: [
-      { id: 'connector', name: 'Wiring connections', c: [420, 121], needs: [], svg: R(392, 110, 36, 22, 'tint-m') + P('M428 121H480', 'wire-pos') + T(418, 98, 'B+ and plug', 'tsm', 'middle'),
+      { id: 'connector', name: 'Wiring connections', c: [420, 121], needs: [], svg: RS(392, 110, 36, 22, 'fill:#15171a;stroke:#050607', 4) + RS(400, 114, 20, 14, 'fill:#c9a23c;stroke:#6b5518', 3) + P('M428 121H480', 'k', 'stroke:#15171a;stroke-width:9;stroke-linecap:round') + P('M428 121H480', 'k', 'stroke:#d93a2b;stroke-width:5;stroke-linecap:round') + T(418, 98, 'B+ and plug', 'tsm', 'middle'),
         remove: [doStep('Fold back the cover, undo the B+ terminal nut and note the cable position', 'sock-12'), doStep('Unclip the multi-plug', null)],
         install: [doStep('Fit the multi-plug until it clicks', null), doStep('Fit the B+ cable on the stud, then tighten the nut and replace the cover', 'sock-12'), torque('Tighten the B+ nut to its torque', 'sock-12', 12)] },
-      { id: 'belt', name: 'Drive belt', c: [170, 225], needs: [], svg: P(hull([[262, 150, 28], [80, 300, 40]]), 'k', 'stroke:var(--ink);stroke-width:8;opacity:0.7') + T(150, 218, 'Belt', 'tsm', 'middle'),
+      { id: 'belt', name: 'Drive belt', c: [170, 225], needs: [], svg: P(hull([[262, 150, 28], [80, 300, 40]]), 'k', 'stroke:#15171a;stroke-width:9') + P(hull([[262, 150, 28], [80, 300, 40]]), 'k2', 'stroke:#7a828a;stroke-width:9;stroke-dasharray:1.6 3.2;opacity:0.65') + T(150, 218, 'Belt', 'tsm', 'middle'),
         remove: [doStep('Turn the tensioner with the breaker bar to release the belt tension', 'breaker'), doStep('Slip the belt off the alternator pulley and let the tensioner back slowly', null)],
         inspect: { label: 'Check the belt for cracks, glazing and fraying', limit: 'No cracks or fraying', fail: 'The belt is cracked: replace it.' },
         install: [doStep('Route the belt as in the belt diagram, then release the tensioner slowly so it seats in every groove', 'breaker')] },
-      { id: 'bracket', name: 'Bracket bolts', c: [245, 150], needs: ['belt', 'connector'], svg: R(180, 64, 130, 12, 'metal-dark') + R(300, 76, 24, 24, 'metal-dark') + R(180, 224, 130, 12, 'metal-dark') + R(300, 200, 24, 24, 'metal-dark'),
+      { id: 'bracket', name: 'Bracket bolts', c: [245, 150], needs: ['belt', 'connector'], svg: RS(180, 64, 130, 12, DARK, 3) + RS(300, 76, 24, 24, DARK, 4) + C(312, 88, 6, 'metal') + RS(180, 224, 130, 12, DARK, 3) + RS(300, 200, 24, 24, DARK, 4) + C(312, 212, 6, 'metal'),
         remove: [bolts('Remove the three bracket bolts, supporting the alternator as the last one comes out', 'sock-17', 3, [3, 1], [0, 1, 2])],
         install: [bolts('Fit the three bracket bolts and run them up finger-tight', 'sock-17', 3, [3, 1], [0, 1, 2]), torque('Torque the bracket bolts', 'sock-17', 45)] },
-      { id: 'alternator', name: 'Alternator', c: [330, 150], needs: ['bracket'], svg: R(290, 100, 100, 100, 'metal') + C(262, 150, 28, 'metal-dark') + C(262, 150, 8, 'box') + T(340, 156, 'Alternator', 'tsm', 'middle'),
+      { id: 'alternator', name: 'Alternator', c: [330, 150], needs: ['bracket'], svg: RS(290, 100, 100, 100, STEEL, 14) + P('M300 120H380M300 134H380M300 148H380M300 162H380M300 176H380', 'k2', 'stroke:#4a5158;stroke-width:2;opacity:0.7') + RS(286, 112, 8, 76, DARK, 3) + C(262, 150, 28, 'metal-dark') + P('M262 126a24 24 0 1 0 .1 0M262 134a16 16 0 1 0 .1 0', 'k2', 'stroke:#8d96a0;stroke-width:1.4') + C(262, 150, 8, 'metal') + T(340, 156, 'Alternator', 'tsm', 'middle'),
         remove: [doStep('Lift the alternator out of the engine bay', null)],
         inspect: { label: 'Bench check: brush length and the one-way pulley', limit: '5 mm minimum brush length, pulley turns freely one way only', fail: 'The alternator fails the bench check: replace it or have it reconditioned.' },
         install: [doStep('Offer the alternator into the bracket and hold it in position', null)] }
     ],
-    statics: R(30, 40, 150, 320, 'metal') + C(80, 300, 40, 'metal-dark') + C(80, 300, 10, 'box') + T(105, 200, 'Engine', 'tsm', 'middle'),
+    statics: RS(30, 40, 150, 320, DARK, 10) + P('M44 60V340M62 60V340M80 60V340', 'k2', 'stroke:#8d96a0;stroke-width:1;opacity:0.35') + C(80, 300, 40, 'metal-dark') + P('M80 262a38 38 0 1 0 .1 0', 'k2', 'stroke:#8d96a0;stroke-width:2;stroke-dasharray:2 3') + C(80, 300, 10, 'metal') + T(105, 200, 'Engine', 'tsm', 'middle'),
     final: ['Reconnect the battery earth lead', 'Start the engine and measure the charging voltage: it should be about 13.8 to 14.5 V', 'Check that the battery warning light goes out', 'Check the belt runs true with no noise']
   }
 ];

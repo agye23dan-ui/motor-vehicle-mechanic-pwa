@@ -1,7 +1,8 @@
 import { h, svgFromString } from '../dom.js';
 import * as store from '../store.js';
 import { icon } from '../icons.js';
-import { TOOLS, R, C, P, T } from './assemblies.js';
+import { TOOLS, R, C, P, T, RS, STEEL, DARK, RED, RUBBER } from './assemblies.js';
+function CS(x, y, r, st) { return '<circle cx="' + x + '" cy="' + y + '" r="' + r + '" style="' + st + '"/>'; }
 import { toolIcon, toolCaption } from './toolicons.js';
 
 /*
@@ -24,33 +25,33 @@ var PEN_TIP = {
 /* Parts are listed in the order a technician would strip them. */
 export var PARTS = [
   { id: 'battery', name: 'Battery', tool: 'sock-10', torque: 6, req: [], last: true, c: [770, 222],
-    svg: R(745, 206, 56, 34, 'box tint-m') + R(752, 198, 10, 8, 'metal-dark') + R(784, 198, 10, 8, 'metal-dark') + T(773, 228, 'Battery', 'tsm', 'middle') },
+    svg: RS(745, 206, 56, 34, 'fill:#23272c;stroke:#101214;stroke-width:1.2', 4) + RS(748, 209, 50, 9, 'fill:#3a4047', 3) + RS(752, 198, 10, 8, 'fill:#d93a2b;stroke:#6b1a12', 2) + RS(784, 198, 10, 8, 'fill:#2a2f35;stroke:#101214', 2) + RS(756, 221, 34, 15, 'fill:#e9eef0', 2) + T(773, 232, 'Battery', 'tsm', 'middle') },
   { id: 'frontwheel', name: 'Front wheel', tool: 'sock-19', torque: 110, req: ['frontbrake', 'driveshaft'], c: [720, 350],
-    svg: C(720, 350, 60, 'metal-dark') + C(720, 350, 42, 'box') + C(720, 350, 42, 'tint-c') + C(720, 350, 9, 'metal-dark') + P('M720 308V392M678 350H762', 'k2') + T(720, 420, 'Front wheel', 'tsm', 'middle') },
+    svg: CS(720, 350, 60, 'fill:#1d2024;stroke:#0a0b0d;stroke-width:1.5') + CS(720, 350, 55, 'fill:none;stroke:#3a4048;stroke-width:7;stroke-dasharray:6 5') + CS(720, 350, 42, 'fill:url(#shMetal);stroke:#59626b;stroke-width:1.2') + P('M720 350L720 314M720 350L754 339M720 350L741 379M720 350L699 379M720 350L686 339', 'k2', 'stroke:#59626b;stroke-width:6;stroke-linecap:round') + CS(720, 350, 9, 'fill:url(#shDark);stroke:#1f2327') + T(720, 420, 'Front wheel', 'tsm', 'middle') },
   { id: 'rearwheel', name: 'Rear wheel', tool: 'sock-19', torque: 110, req: ['rearbrake'], c: [250, 350],
-    svg: C(250, 350, 60, 'metal-dark') + C(250, 350, 42, 'box') + C(250, 350, 42, 'tint-c') + C(250, 350, 9, 'metal-dark') + P('M250 308V392M208 350H292', 'k2') + T(250, 420, 'Rear wheel', 'tsm', 'middle') },
+    svg: CS(250, 350, 60, 'fill:#1d2024;stroke:#0a0b0d;stroke-width:1.5') + CS(250, 350, 55, 'fill:none;stroke:#3a4048;stroke-width:7;stroke-dasharray:6 5') + CS(250, 350, 42, 'fill:url(#shMetal);stroke:#59626b;stroke-width:1.2') + P('M250 350L250 314M250 350L284 339M250 350L271 379M250 350L229 379M250 350L216 339', 'k2', 'stroke:#59626b;stroke-width:6;stroke-linecap:round') + CS(250, 350, 9, 'fill:url(#shDark);stroke:#1f2327') + T(250, 420, 'Rear wheel', 'tsm', 'middle') },
   { id: 'driveshaft', name: 'Driveshaft', tool: 'sock-32', torque: 250, req: ['gearbox', 'frontbrake'], c: [640, 325],
-    svg: P('M556 302L716 346', 'k', 'stroke:var(--ink);stroke-width:7;opacity:0.85') + R(552, 292, 14, 20, 'metal-dark') + C(716, 346, 9, 'metal-dark') },
+    svg: P('M556 302L716 346', 'k', 'stroke:#15171a;stroke-width:10;stroke-linecap:round') + P('M556 302L716 346', 'k', 'stroke:#cfd4da;stroke-width:5;stroke-linecap:round') + P('M688 338L712 345', 'k', 'stroke:#1d2024;stroke-width:15;stroke-linecap:round') + RS(552, 292, 14, 20, STEEL, 3) + CS(716, 346, 10, 'fill:url(#shMetal);stroke:#59626b') },
   { id: 'frontbrake', name: 'Front brake', tool: 'sock-17', torque: 95, req: ['frontstrut'], c: [720, 350],
-    svg: C(720, 350, 36, 'metal') + C(720, 350, 12, 'metal-dark') + R(738, 322, 18, 30, 'tint-m') },
+    svg: CS(720, 350, 36, 'fill:url(#shMetal);stroke:#59626b;stroke-width:1.4') + CS(720, 350, 26, 'fill:none;stroke:#4a5158;stroke-width:2;stroke-dasharray:3 3') + CS(720, 350, 12, 'fill:url(#shDark);stroke:#1f2327') + RS(738, 322, 18, 30, RED, 5) + CS(747, 330, 2, 'fill:#cfd4da') },
   { id: 'rearbrake', name: 'Rear drum brake', tool: 'sock-13', torque: 60, req: ['rearaxle'], c: [250, 350],
-    svg: C(250, 350, 36, 'metal') + C(250, 350, 12, 'metal-dark') + C(250, 350, 22, 'k2') },
+    svg: CS(250, 350, 36, 'fill:url(#shMetal);stroke:#59626b;stroke-width:1.4') + CS(250, 350, 30, 'fill:none;stroke:#4a5158;stroke-width:1.4') + CS(250, 350, 22, 'fill:none;stroke:#8d96a0;stroke-width:1') + CS(250, 350, 12, 'fill:url(#shDark);stroke:#1f2327') },
   { id: 'frontstrut', name: 'Front strut', tool: 'sock-17', torque: 70, req: [], c: [706, 288],
-    svg: R(700, 226, 12, 118, 'metal-dark') + P('M690 252l20 6-20 8 20 8-20 8 20 8', 'k2') + R(692, 220, 28, 10, 'metal') },
+    svg: RS(700, 226, 12, 118, DARK, 3) + P('M690 252l20 6-20 8 20 8-20 8 20 8', 'k2', 'stroke:#c0392b;stroke-width:3.2;stroke-linejoin:round') + RS(692, 220, 28, 10, STEEL, 3) + RS(703, 330, 6, 14, STEEL, 2) },
   { id: 'rearaxle', name: 'Rear axle and spring', tool: 'sock-19', torque: 100, req: [], c: [270, 336],
-    svg: R(180, 346, 160, 8, 'metal-dark') + P('M332 310l16 4-16 6 16 6-16 6 16 6', 'k2') + R(206, 296, 8, 50, 'metal-dark') },
+    svg: RS(180, 346, 160, 8, DARK, 3) + P('M332 310l16 4-16 6 16 6-16 6 16 6', 'k2', 'stroke:#c0392b;stroke-width:3.2;stroke-linejoin:round') + RS(206, 296, 8, 50, DARK, 2) + RS(203, 292, 14, 8, STEEL, 2) },
   { id: 'alternator', name: 'Alternator', tool: 'sock-13', torque: 25, req: ['engine'], c: [690, 300],
-    svg: C(690, 300, 18, 'metal-dark') + C(690, 300, 6, 'box') + T(690, 332, 'Alternator', 'tsm', 'middle') },
+    svg: CS(690, 300, 18, 'fill:url(#shDark);stroke:#1f2327;stroke-width:1.4') + CS(690, 300, 12, 'fill:none;stroke:#8d96a0;stroke-width:1.4;stroke-dasharray:3 3') + CS(690, 300, 6, 'fill:url(#shMetal);stroke:#59626b') + T(690, 332, 'Alternator', 'tsm', 'middle') },
   { id: 'exhaust', name: 'Exhaust system', tool: 'sock-13', torque: 40, req: ['engine'], c: [400, 390],
-    svg: P('M640 322V350Q640 392 590 392H280', 'k', 'stroke:var(--ink);stroke-width:9;opacity:0.7') + R(180, 378, 100, 26, 'metal') + T(230, 396, 'Exhaust', 'tsm', 'middle') },
+    svg: P('M640 322V350Q640 392 590 392H280', 'k', 'stroke:#4a5158;stroke-width:12;stroke-linecap:round') + P('M640 322V350Q640 392 590 392H280', 'k', 'stroke:#cfd4da;stroke-width:7;stroke-linecap:round') + RS(180, 378, 100, 26, STEEL, 13) + P('M196 380V402M210 380V402M224 380V402', 'k2', 'stroke:#7a828a;stroke-width:1') + T(230, 396, 'Exhaust', 'tsm', 'middle') },
   { id: 'fueltank', name: 'Fuel tank', tool: 'sock-13', torque: 30, req: [], c: [380, 355],
-    svg: R(320, 334, 130, 44, 'tint-y') + T(385, 361, 'Fuel tank', 'tsm', 'middle') },
+    svg: RS(320, 334, 130, 44, 'fill:#4a4f56;stroke:#1f2327;stroke-width:1.2', 12) + P('M350 332V380M420 332V380', 'k2', 'stroke:#cfd4da;stroke-width:3') + T(385, 361, 'Fuel tank', 'tsm', 'middle') },
   { id: 'radiator', name: 'Radiator', tool: 'sock-10', torque: 8, req: [], c: [812, 280],
-    svg: R(798, 238, 26, 86, 'box tint-c') + P('M802 248h18M802 262h18M802 276h18M802 290h18M802 304h18', 'k2') },
+    svg: RS(798, 238, 26, 86, 'fill:#59626b;stroke:#2a2f35;stroke-width:1.2', 3) + RS(795, 231, 32, 9, STEEL, 3) + RS(795, 322, 32, 9, STEEL, 3) + P('M802 248h18M802 258h18M802 268h18M802 278h18M802 288h18M802 298h18M802 308h18', 'k2', 'stroke:#cfd4da;stroke-width:1.4;opacity:0.8') },
   { id: 'gearbox', name: 'Gearbox', tool: 'sock-17', torque: 50, req: ['engine'], c: [515, 288],
-    svg: R(468, 252, 94, 72, 'metal-dark') + T(515, 292, 'Gearbox', 'tsm', 'middle') },
+    svg: RS(468, 252, 94, 72, DARK, 12) + P('M484 258V318M500 258V318M516 258V318M532 258V318M548 258V318', 'k2', 'stroke:#8d96a0;stroke-width:1;opacity:0.45') + RS(552, 258, 14, 60, STEEL, 5) + T(510, 292, 'Gearbox', 'tsm', 'middle') },
   { id: 'engine', name: 'Engine', tool: 'sock-17', torque: 80, req: [], c: [635, 270],
-    svg: R(562, 232, 150, 92, 'metal') + R(572, 214, 130, 18, 'metal-dark') + R(598, 200, 80, 14, 'tint-c') + T(637, 282, 'Engine', 'tsm', 'middle') }
+    svg: RS(562, 232, 150, 92, DARK, 10) + P('M580 240V318M600 240V318M620 240V318M640 240V318M660 240V318M680 240V318', 'k2', 'stroke:#8d96a0;stroke-width:1;opacity:0.35') + RS(572, 214, 130, 18, STEEL, 6) + RS(598, 200, 80, 14, DARK, 4) + CS(612, 196, 5, 'fill:#d93a2b;stroke:#6b1a12') + RS(704, 226, 14, 30, 'fill:#2a2f35;stroke:#101214', 4) + T(637, 282, 'Engine', 'tsm', 'middle') }
 ];
 var BY = {}; PARTS.forEach(function (p) { BY[p.id] = p; });
 
@@ -70,11 +71,13 @@ function shuffle(a) { var b = a.slice(); for (var i = b.length - 1; i > 0; i--) 
 
 function frame() {
   var body = 'M120 330V262Q124 226 178 214L318 202Q376 150 478 148L610 150Q672 152 706 204L824 218Q876 228 884 264L888 330Z';
-  return '<path d="' + body + '" class="tint-c-soft" style="stroke:var(--ink-3);stroke-width:2"/>' +
-    '<path d="M330 204Q384 160 478 158L604 160Q650 162 676 204Z" class="box" style="fill-opacity:0.55"/>' +
+  return '<ellipse cx="504" cy="414" rx="410" ry="10" fill="#101214" opacity="0.18"/>' +
+    '<path d="' + body + '" style="fill:url(#shPaint);fill-opacity:0.5;stroke:#4a5560;stroke-width:2.2"/>' +
+    '<path d="M330 204Q384 160 478 158L604 160Q650 162 676 204Z" style="fill:url(#shGlass);fill-opacity:0.6;stroke:#4a5560;stroke-width:1.6"/>' +
     '<path d="M470 156V204M560 158V204" class="k2"/>' +
-    C(250, 350, 76, 'box') + C(720, 350, 76, 'box') +
-    R(124, 318, 764, 12, 'metal-dark') +
+    '<path d="M178 216L200 232M706 206L720 224" class="k2" style="stroke:#fff;stroke-opacity:0.5"/>' +
+    '<circle cx="250" cy="350" r="76" style="fill:#14171a;fill-opacity:0.28;stroke:#4a5560;stroke-width:1.6"/><circle cx="720" cy="350" r="76" style="fill:#14171a;fill-opacity:0.28;stroke:#4a5560;stroke-width:1.6"/>' +
+    '<rect x="124" y="318" width="764" height="12" rx="3" style="fill:url(#shDark);stroke:#1f2327;stroke-width:1.2"/>' +
     '<path d="M40 412H920" class="k2"/>' +
     T(920, 302, 'FRONT', 'tb', 'end') + P('M820 290H900', 'k', 'marker-end:url(#ar)') + '';
 }
@@ -88,9 +91,9 @@ function build(kind, onExit) {
   PARTS.forEach(function (p) { st.installed[p.id] = strip; });
 
   var gparts = PARTS.slice().reverse().map(function (p) { return '<g class="veh-part" data-id="' + p.id + '" tabindex="0" role="button" aria-label="' + p.name + '" style="touch-action:none"><title>' + p.name + '</title>' + p.svg + '</g>'; }).join('');
-  var svgEl = svgFromString('<svg xmlns="http://www.w3.org/2000/svg" class="dg veh-svg" viewBox="0 0 940 520" role="group" aria-label="Car frame and workbench"><title>Car frame and workbench</title><defs><linearGradient id="shMetal" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f1f4f6"/><stop offset="0.45" stop-color="#bcc3ca"/><stop offset="1" stop-color="#7c858e"/></linearGradient><linearGradient id="shRed" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#e5584a"/><stop offset="1" stop-color="#9c231a"/></linearGradient><linearGradient id="shDark" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7a828a"/><stop offset="0.5" stop-color="#4a5159"/><stop offset="1" stop-color="#2a2e33"/></linearGradient></defs>' +
+  var svgEl = svgFromString('<svg xmlns="http://www.w3.org/2000/svg" class="dg veh-svg" viewBox="0 0 940 520" role="group" aria-label="Car frame and workbench"><title>Car frame and workbench</title><defs><linearGradient id="shMetal" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f1f4f6"/><stop offset="0.45" stop-color="#bcc3ca"/><stop offset="1" stop-color="#7c858e"/></linearGradient><linearGradient id="shPaint" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#9fb4c6"/><stop offset="1" stop-color="#5f7487"/></linearGradient><linearGradient id="shGlass" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#cfe6f3"/><stop offset="1" stop-color="#6f9ab8"/></linearGradient><linearGradient id="shRed" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#e5584a"/><stop offset="1" stop-color="#9c231a"/></linearGradient><linearGradient id="shDark" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7a828a"/><stop offset="0.5" stop-color="#4a5159"/><stop offset="1" stop-color="#2a2e33"/></linearGradient></defs>' +
     '<defs><marker id="ar" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M1 1.5 9 5 1 8.5z" class="head"/></marker></defs>' +
-    '<rect x="14" y="432" width="912" height="80" rx="6" class="tint-y-soft"/><text x="916" y="448" class="tsm" text-anchor="end">Workbench: drop removed parts here</text>' +
+    '<rect x="14" y="432" width="912" height="14" rx="3" style="fill:#c79a5f;stroke:#7a5a30;stroke-width:1.2"/><rect x="24" y="446" width="892" height="66" style="fill:#8f6b3d;stroke:#5c4222;stroke-width:1.2"/><path d="M34 460H906M34 476H906M34 492H906" stroke="#5c4222" stroke-opacity="0.35" stroke-width="1"/><path d="M80 438H300M420 436H640M700 438H900" stroke="#7a5a30" stroke-opacity="0.45" stroke-width="1"/><text x="916" y="428" class="tsm" text-anchor="end">Workbench: drop removed parts here</text>' +
     frame() + '<g class="veh-ghosts"></g>' + gparts + '</svg>');
   var groups = {}, ghosts = {}, box = {};
   var NS = 'http://www.w3.org/2000/svg';
