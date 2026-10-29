@@ -70,8 +70,30 @@ export function checkForUpdate() {
   if (!('serviceWorker' in navigator)) return Promise.resolve('unsupported');
   return navigator.serviceWorker.getRegistration().then(function (reg) {
     if (!reg) return 'unsupported';
-    return reg.update().then(function () { return reg.waiting || reg.installing ? 'found' : 'current'; });
+    return reg.update().then(function () {
+      var w = reg.waiting || reg.installing;
+      if (!w) return 'current';
+      if (w.state === 'installed') return 'ready';
+      /* A new version is still downloading. It is only usable once it reaches "installed"; if a file is missing it ends as "redundant". */
+      return new Promise(function (resolve) {
+        var timer = window.setTimeout(function () { resolve('failed'); }, 45000);
+        w.addEventListener('statechange', function () {
+          if (w.state === 'installed') { window.clearTimeout(timer); resolve('ready'); }
+          else if (w.state === 'redundant') { window.clearTimeout(timer); resolve('failed'); }
+        });
+      });
+    });
   }).catch(function () { return 'failed'; });
+}
+
+/* Switches to the downloaded version. The page reloads when the new worker takes over. */
+export function applyUpdate() {
+  if (!('serviceWorker' in navigator)) return Promise.resolve(false);
+  return navigator.serviceWorker.getRegistration().then(function (reg) {
+    if (!reg || !reg.waiting) return false;
+    reg.waiting.postMessage('SKIP_WAITING');
+    return true;
+  });
 }
 
 export function offlineReady() {

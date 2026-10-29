@@ -79,7 +79,16 @@ export function render() {
     h('div', { class: 'btn-row' },
       h('button', { class: 'btn', type: 'button', onclick: function () {
         status.textContent = 'Checking…';
-        platform.checkForUpdate().then(function (r) { status.textContent = r === 'current' ? 'You have the latest version.' : r === 'found' ? 'An update was found and will be offered shortly.' : r === 'unsupported' ? 'Updates are not available in this browser or when opened as a file.' : 'Could not check. Are you offline?'; });
+        platform.checkForUpdate().then(function (r) {
+          if (r === 'ready') {
+            status.replaceChildren('A new version is ready. ', h('button', { class: 'btn primary', type: 'button', onclick: function () {
+              status.textContent = 'Updating…';
+              platform.applyUpdate().then(function (ok) { if (!ok) status.textContent = 'The update is no longer waiting. Check again.'; });
+            } }, 'Update now'));
+            return;
+          }
+          status.textContent = r === 'current' ? 'You have the latest version.' : r === 'unsupported' ? 'Updates are not available in this browser or when opened as a file.' : r === 'failed' ? 'A new version exists but could not be downloaded. Connect to the internet and try again, or use Clear offline copy.' : 'Could not check. Are you offline?';
+        });
       } }, 'Check for updates'),
       h('button', { class: 'btn', type: 'button', onclick: function () {
         confirmDialog('Clear the offline copy?', 'Your progress is kept. The app reloads and downloads its files again, so you need internet for this.', 'Clear and reload').then(function (ok) { if (ok) platform.clearCachesAndReload(); });
