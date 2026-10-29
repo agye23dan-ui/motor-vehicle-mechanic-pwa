@@ -1077,9 +1077,16 @@
             
             let pointerDownPos = { x: 0, y: 0 };
             
+            // Stop the Android app's pull-to-refresh from hijacking camera drags.
+            const lockRefresh = (lock) => {
+                if (window.TradeNative) window.TradeNative.lockRefresh(lock);
+            };
+            container.style.touchAction = 'none';
             container.addEventListener('pointerdown', (e) => {
                 pointerDownPos = { x: e.clientX, y: e.clientY };
+                lockRefresh(true);
             });
+            ['pointerup', 'pointercancel'].forEach(t => window.addEventListener(t, () => lockRefresh(false)));
 
             container.addEventListener('pointerup', (e) => {
                 // Prevent trigger if dragging camera view

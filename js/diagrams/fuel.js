@@ -210,26 +210,35 @@ DIAGRAMS['turbocharger'] = {
     /* oil */
     s += pipe('M240 100V142', 'oil', 7) + arr('M240 108V136') + t(252, 112, 'Oil in', 'ts');
     s += pipe('M240 198V238', 'oil', 7) + arr('M240 206V232') + t(252, 228, 'Oil return', 'ts');
-    /* compressor side */
+    /* compressor housing (cold side), bearing housing and turbine housing (hot side), drawn as cast volutes */
     s += pipe('M10 170H60', 'cold', 14) + arr('M14 170H56') + t(10, 196, 'Fresh', 'ts') + t(10, 212, 'air in', 'ts');
-    s += shape(60, 105, 90, 130, 'fl-cold', 6);
-    /* bearing housing */
-    s += shape(150, 142, 180, 56, 'metal', 3) + t(240, 190, 'Centre bearing housing', 'tsm', 'middle');
-    /* turbine side */
-    s += shape(330, 105, 80, 130, 'fl-hot', 6);
-    s += '<polygon points="108,128 146,152 146,188 108,212" class="metal-dark"/>';
-    s += '<polygon points="368,128 332,152 332,188 368,212" class="metal-dark"/>';
-    s += '<path d="M146 170H332" class="k bold"/>' + t(240, 162, 'Shaft', 'tsm', 'middle');
+    s += '<path d="M60 128Q60 105 92 105H146V235H92Q60 235 60 212Z" style="fill:#aebcc8;stroke:#4a5560;stroke-width:1.6"/><path d="M146 105Q166 120 166 170Q166 220 146 235" style="fill:none;stroke:#4a5560;stroke-width:1.6"/><path d="M70 122Q96 112 140 112" style="fill:none;stroke:#fff;stroke-width:3;opacity:0.55;stroke-linecap:round"/>';
+    s += '<rect x="150" y="142" width="180" height="56" rx="6" class="metal"/><path d="M150 152H330M150 188H330" style="stroke:#59626b;stroke-width:1;opacity:0.6"/>' + t(240, 190, 'Centre bearing housing', 'tsm', 'middle');
+    s += '<path d="M410 128Q410 105 378 105H330V235H378Q410 235 410 212Z" style="fill:#d9a9a0;stroke:#6b3a33;stroke-width:1.6"/><path d="M330 105Q312 120 312 170Q312 220 330 235" style="fill:none;stroke:#6b3a33;stroke-width:1.6"/><path d="M400 122Q380 112 338 112" style="fill:none;stroke:#fff;stroke-width:3;opacity:0.45;stroke-linecap:round"/>';
+    /* compressor wheel and turbine wheel, with blades */
+    var bl = '';
+    for (var k = 0; k < 7; k++) {
+      var yy = 126 + k * 8.5;
+      bl += '<path d="M112 ' + yy + 'L146 ' + (yy + 8) + '" style="stroke:#59626b;stroke-width:1.2"/>';
+    }
+    s += '<polygon points="108,128 146,152 146,188 108,212" class="metal"/>' + bl + '<circle cx="108" cy="170" r="5" class="metal-dark"/>';
+    var bt = '';
+    for (var q = 0; q < 7; q++) {
+      var y2 = 126 + q * 8.5;
+      bt += '<path d="M368 ' + y2 + 'L332 ' + (y2 + 8) + '" style="stroke:#3a2a27;stroke-width:1.2"/>';
+    }
+    s += '<polygon points="368,128 332,152 332,188 368,212" class="metal-dark"/>' + bt + '<circle cx="368" cy="170" r="5" class="metal"/>';
+    s += '<rect x="146" y="166" width="186" height="8" rx="3" style="fill:#e6eaee;stroke:#3b4148;stroke-width:1.2"/>' + t(240, 162, 'Shaft', 'tsm', 'middle');
     /* exhaust gas */
     s += pipe('M380 30V105', 'hot', 14) + arr('M380 40V98') + t(366, 48, 'Exhaust in', 'ts', 'end');
     s += pipe('M410 170H474', 'hot', 14) + arr('M414 170H470');
     s += t(442, 192, 'Exhaust', 'ts', 'middle') + t(442, 208, 'out', 'ts', 'middle');
     /* wastegate */
     s += pipe('M380 66H458V164', 'hot', 6);
-    s += rect(446, 104, 24, 20, 'box tint-c-soft', 3) + t(470, 54, 'Wastegate', 'ts', 'end');
+    s += '<rect x="444" y="102" width="28" height="24" rx="5" class="metal"/><circle cx="458" cy="114" r="5" class="metal-dark"/><path d="M458 126V150" style="stroke:#59626b;stroke-width:3"/>' + t(470, 54, 'Wastegate', 'ts', 'end');
     /* compressed air */
     s += pipe('M80 235V300H140', 'hot', 7) + t(10, 324, 'Hot compressed air', 'ts');
-    s += rect(140, 284, 90, 32, 'box tint-c-soft', 4) + t(185, 305, 'Intercooler', 'tsm', 'middle');
+    s += '<rect x="140" y="284" width="90" height="32" rx="4" style="fill:#59626b;stroke:#2a2f35;stroke-width:1.4"/>'; for (var fi = 0; fi < 11; fi++) s += '<path d="M' + (148 + fi * 7.4) + ' 288V312" style="stroke:#cfd4da;stroke-width:1.4;opacity:0.85"/>'; s += '<rect x="128" y="290" width="12" height="20" rx="2" class="metal"/><rect x="230" y="290" width="12" height="20" rx="2" class="metal"/>' + t(185, 277, 'Intercooler', 'tsm', 'middle');
     s += pipe('M230 300H330', 'cold', 7) + arr('M236 300H326') + t(240, 340, 'Cooled air to engine intake', 'ts', 'middle');
     /* side labels */
     s += t(115, 262, 'Intake side', 't-blue', 'middle') + t(115, 279, '(compressor)', 'ts', 'middle');

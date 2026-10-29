@@ -61,33 +61,37 @@ DIAGRAMS['engine-cross-section'] = {
   caption: 'One cylinder cut open. The piston is pushed down by the burning mixture and turns the crankshaft through the connecting rod.',
   svg: function () {
     var b = '', i, L = [];
-    /* block, bore, head */
+    /* block with water jackets, bore, head with ports */
     b += R(100, 112, 140, 150, 'metal');
-    b += R(125, 112, 90, 150, 'box');
+    b += '<rect x="104" y="116" width="16" height="140" rx="4" style="fill:#7fc4e8;fill-opacity:0.55;stroke:#4a8fb3;stroke-width:1"/><rect x="220" y="116" width="16" height="140" rx="4" style="fill:#7fc4e8;fill-opacity:0.55;stroke:#4a8fb3;stroke-width:1"/>';
+    b += '<rect x="125" y="112" width="90" height="150" style="fill:#e9eef1;stroke:#2a2f35;stroke-width:1.4"/><path d="M127 112V262M213 112V262" style="stroke:#9aa3ac;stroke-width:2.5;opacity:0.7"/>';
     b += R(100, 56, 140, 56, 'metal');
+    b += '<path d="M100 84Q124 84 128 104" style="fill:none;stroke:#4aa3df;stroke-width:12;stroke-linecap:round;opacity:0.8"/><path d="M240 84Q216 84 212 104" style="fill:none;stroke:#b5543f;stroke-width:12;stroke-linecap:round;opacity:0.8"/>';
     b += R(125, 104, 90, 8, 'box');
     /* crankcase and sump */
     b += P('M100 262L90 300V350M240 262L250 300V350', 'k');
-    b += '<path d="M90 350L105 395H235L250 350Z" class="box"/>';
+    b += '<path d="M90 350L105 395H235L250 350Z" style="fill:#2c3036;stroke:#101214;stroke-width:1.6"/>';
     b += '<path d="M97 372H243L235 395H105Z" class="fl-oil"/>';
     b += P('M97 372H243', 'k2');
-    /* camshafts and valves */
+    b += '<rect x="168" y="388" width="14" height="10" rx="2" style="fill:#c8cdd2;stroke:#59626b"/>';
+    /* camshafts, valves with springs, plug */
     [130, 210].forEach(function (vx) {
-      b += '<ellipse cx="' + vx + '" cy="38" rx="8" ry="11" class="metal-dark"/>';
-      b += P('M' + vx + ' 49V112', 'k bold') + R(vx - 10, 112, 20, 5, 'metal-dark', 1.5);
+      b += '<ellipse cx="' + vx + '" cy="38" rx="9" ry="12" class="metal-dark"/><circle cx="' + vx + '" cy="40" r="3" style="fill:#cfd4da"/>';
+      b += '<path d="M' + vx + ' 49V112" style="stroke:#e6eaee;stroke-width:5;stroke-linecap:round"/><path d="M' + vx + ' 49V112" style="stroke:#59626b;stroke-width:1.2;fill:none"/>';
+      b += '<path d="M' + (vx - 9) + ' 114L' + (vx + 9) + ' 114L' + (vx + 4) + ' 108H' + (vx - 4) + 'Z" style="fill:#aeb5bc;stroke:#3b4148;stroke-width:1.2"/>';
+      b += '<path d="M' + (vx - 8) + ' 62l16 5-16 5 16 5-16 5 16 5-16 5" style="fill:none;stroke:#7a828a;stroke-width:2.4"/>';
     });
-    /* spark plug */
-    b += R(166, 28, 8, 84, 'metal-dark') + R(162, 24, 16, 8, 'box');
+    b += '<rect x="166" y="28" width="8" height="84" rx="2" style="fill:#f1f0ea;stroke:#9aa2aa"/><rect x="160" y="22" width="20" height="9" rx="2" class="metal-dark"/><rect x="167" y="96" width="6" height="16" style="fill:#8d96a0"/>';
     /* piston, rings, pin, rod */
-    b += R(126, 190, 88, 36, 'metal');
-    b += P('M126 196H214M126 202H214', 'k2');
-    b += P('M170 212L190 336', 'k bold');
-    b += '<circle cx="170" cy="212" r="5" class="box"/>';
+    b += '<rect x="126" y="190" width="88" height="36" rx="3" class="metal"/>';
+    b += '<path d="M127 196H213M127 202H213M127 208H213" style="stroke:#2a2f35;stroke-width:1.8"/><path d="M140 226V218H200V226" style="fill:none;stroke:#59626b;stroke-width:1.2"/>';
+    b += '<path d="M164 214L162 336L178 336L176 214Z" style="fill:#aeb5bc;stroke:#3b4148;stroke-width:1.4"/>';
+    b += '<circle cx="170" cy="212" r="6" style="fill:#4a5058;stroke:#1d2024;stroke-width:1.4"/>';
     /* crankshaft and counterweight */
-    b += '<circle cx="170" cy="310" r="18" class="metal"/>';
+    b += '<circle cx="170" cy="310" r="22" class="metal"/>';
     b += '<path d="M132 310A38 38 0 0 1 208 310Z" class="metal-dark"/>';
-    b += '<circle cx="170" cy="310" r="7" class="box"/><circle cx="190" cy="336" r="7" class="box"/>';
-    b += P('M208 310H296', 'k bold');
+    b += '<circle cx="170" cy="310" r="8" style="fill:#2a2f35;stroke:#8d96a0"/><circle cx="190" cy="336" r="9" style="fill:#aeb5bc;stroke:#3b4148;stroke-width:1.4"/><circle cx="190" cy="336" r="4" style="fill:#4a5058"/>';
+    b += '<rect x="208" y="304" width="88" height="12" rx="3" class="metal"/>';
     /* leaders */
     b += lead(50, 38, 121, 38) + lead(50, 72, 128, 72) + lead(50, 104, 110, 104) + lead(50, 150, 108, 150) +
       lead(50, 208, 131, 215) + lead(50, 380, 115, 384) +

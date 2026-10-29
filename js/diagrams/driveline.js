@@ -66,18 +66,40 @@ DIAGRAMS['manual-gearbox-power-flow'] = {
 DIAGRAMS['differential'] = {
   caption: 'The crown wheel turns the differential carrier. Driving straight, the spider gears do not turn on their pins. Going round a corner they spin, letting the outer wheel turn faster than the inner one. An open differential sends equal torque to both wheels.',
   svg: function () {
+    function gear(cx, cy, r, teeth) {
+      var d = '', i;
+      for (i = 0; i < teeth; i++) {
+        var a0 = i / teeth * Math.PI * 2, a1 = (i + 0.5) / teeth * Math.PI * 2;
+        d += (i ? 'L' : 'M') + (cx + Math.cos(a0) * (r - 3)).toFixed(1) + ' ' + (cy + Math.sin(a0) * (r - 3)).toFixed(1) +
+          'L' + (cx + Math.cos(a0 + 0.05) * (r + 3)).toFixed(1) + ' ' + (cy + Math.sin(a0 + 0.05) * (r + 3)).toFixed(1) +
+          'L' + (cx + Math.cos(a1 - 0.05) * (r + 3)).toFixed(1) + ' ' + (cy + Math.sin(a1 - 0.05) * (r + 3)).toFixed(1) +
+          'L' + (cx + Math.cos(a1) * (r - 3)).toFixed(1) + ' ' + (cy + Math.sin(a1) * (r - 3)).toFixed(1);
+      }
+      return '<path d="' + d + 'Z" class="metal"/>';
+    }
     function diff(y, turning, title) {
       var s = t(20, y + 4, title, 'tb');
-      var cx = 240, cy = y + 76;
-      s += '<path d="M40 ' + cy + 'H' + (cx - 44) + 'M' + (cx + 44) + ' ' + cy + 'H440" class="k bold"/>';
-      s += t(40, cy - 10, turning ? 'Inner wheel: slower' : 'Left wheel: same speed', 'tsm') + t(440, cy - 10, turning ? 'Outer wheel: faster' : 'Right wheel: same speed', 'tsm', 'end');
-      s += '<circle cx="' + cx + '" cy="' + cy + '" r="46" class="metal"/>';
-      s += '<rect x="' + (cx - 46) + '" y="' + (cy - 11) + '" width="14" height="22" class="metal-dark"/><rect x="' + (cx + 32) + '" y="' + (cy - 11) + '" width="14" height="22" class="metal-dark"/>';
-      s += '<rect x="' + (cx - 11) + '" y="' + (cy - 34) + '" width="22" height="14" class="metal-dark"/><rect x="' + (cx - 11) + '" y="' + (cy + 20) + '" width="22" height="14" class="metal-dark"/>';
-      s += '<path d="M' + (cx) + ' ' + (cy - 20) + 'V' + (cy + 20) + '" class="k2"/>';
-      s += '<path d="M' + cx + ' ' + (y + 12) + 'V' + (cy - 46) + '" class="k bold"/>' + t(cx + 8, y + 26, 'Pinion from the propeller shaft', 'tsm');
-      s += t(cx + 54, cy + 40, 'Carrier and crown wheel', 'tsm');
-      s += turning ? t(cx - 54, cy + 40, 'Spider gears turn', 'tsm', 'end') : t(cx - 54, cy + 40, 'Spider gears do not turn', 'tsm', 'end');
+      var cx = 240, cy = y + 76, spin = turning ? 38 : 0;
+      /* axle shafts with splined ends, drawn as shiny steel */
+      s += '<rect x="40" y="' + (cy - 5) + '" width="' + (cx - 84) + '" height="10" rx="4" class="metal"/><rect x="' + (cx + 44) + '" y="' + (cy - 5) + '" width="' + (396 - cx) + '" height="10" rx="4" class="metal"/>';
+      s += t(40, cy - 14, turning ? 'Inner wheel: slower' : 'Left wheel: same speed', 'tsm') + t(440, cy - 14, turning ? 'Outer wheel: faster' : 'Right wheel: same speed', 'tsm', 'end');
+      /* crown wheel (ring gear) and carrier */
+      s += gear(cx, cy, 52, 30);
+      s += '<circle cx="' + cx + '" cy="' + cy + '" r="44" class="metal-dark"/><circle cx="' + cx + '" cy="' + cy + '" r="38" style="fill:#c9ced3;stroke:#59626b;stroke-width:1.2"/>';
+      /* side gears on the axle shafts and spider gears on the cross pin */
+      s += '<path d="M' + (cx - 32) + ' ' + (cy - 11) + 'L' + (cx - 14) + ' ' + (cy - 6) + 'V' + (cy + 6) + 'L' + (cx - 32) + ' ' + (cy + 11) + 'Z" class="metal-dark"/>';
+      s += '<path d="M' + (cx + 32) + ' ' + (cy - 11) + 'L' + (cx + 14) + ' ' + (cy - 6) + 'V' + (cy + 6) + 'L' + (cx + 32) + ' ' + (cy + 11) + 'Z" class="metal-dark"/>';
+      s += '<rect x="' + (cx - 2.5) + '" y="' + (cy - 26) + '" width="5" height="52" rx="2" style="fill:#2a2f35"/>';
+      [-1, 1].forEach(function (sg) {
+        var yy = cy + sg * 17;
+        s += '<g transform="translate(' + cx + ' ' + yy + ') rotate(' + (sg * spin) + ')"><path d="M-10 ' + (-9 * sg) + 'L10 ' + (-9 * sg) + 'L6 ' + (9 * sg) + 'L-6 ' + (9 * sg) + 'Z" class="metal"/>' +
+          '<path d="M-7 -3H7M-6 3H6" style="stroke:#59626b;stroke-width:1"/></g>';
+      });
+      /* pinion shaft and pinion gear meshing with the crown wheel */
+      s += '<rect x="' + (cx - 5) + '" y="' + (y + 10) + '" width="10" height="' + (cy - 52 - y - 10) + '" rx="3" class="metal"/><path d="M' + (cx - 14) + ' ' + (cy - 52) + 'L' + (cx + 14) + ' ' + (cy - 52) + 'L' + (cx + 9) + ' ' + (cy - 42) + 'L' + (cx - 9) + ' ' + (cy - 42) + 'Z" class="metal-dark"/>';
+      s += t(cx + 22, y + 26, 'Pinion from the propeller shaft', 'tsm');
+      s += t(cx + 58, cy + 44, 'Carrier and crown wheel', 'tsm');
+      s += turning ? t(cx - 58, cy + 44, 'Spider gears turn', 'tsm', 'end') : t(cx - 58, cy + 44, 'Spider gears do not turn', 'tsm', 'end');
       return s;
     }
     var b = diff(8, false, 'Driving straight ahead') + diff(178, true, 'Going round a corner');

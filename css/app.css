@@ -514,6 +514,14 @@ tr:last-child td { border-bottom: 0; }
 .dots14 { display: flex; gap: 3px; flex-wrap: wrap; margin-top: 0.6rem; }
 
 /* ---------- Vehicle diagram classes (use these in js/diagrams/*.js) ---------- */
+/* Solid, lit look for lesson diagrams: brushed metal, a soft shadow under every component, and gloss on tinted parts */
+.diagram .dg .metal { fill: url(#shMetal); fill-opacity: 1; stroke: #59626b; stroke-width: 1.4; }
+.diagram .dg .metal-dark { fill: url(#shDark); fill-opacity: 1; stroke: #1f2327; stroke-width: 1.4; }
+.diagram .dg .rubber { fill: #1d2024; fill-opacity: 1; stroke: #0a0b0d; stroke-width: 1.3; }
+.diagram .dg .box { filter: drop-shadow(1px 2px 1.5px rgba(20, 24, 28, 0.28)); }
+.diagram .dg .metal, .diagram .dg .metal-dark { filter: drop-shadow(1.5px 2.5px 2px rgba(20, 24, 28, 0.38)); }
+.diagram .dg .pipe { stroke-width: 9; opacity: 0.9; stroke-linecap: round; filter: drop-shadow(0 1.5px 1px rgba(20, 24, 28, 0.35)); }
+.diagram .dg .bad { fill-opacity: 0.55; }
 .dg .fl-hot { fill: var(--magenta); fill-opacity: 0.35; }
 .dg .fl-cold { fill: var(--cyan); fill-opacity: 0.30; }
 .dg .fl-oil { fill: var(--yellow); fill-opacity: 0.5; }
