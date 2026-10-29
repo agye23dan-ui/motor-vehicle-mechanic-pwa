@@ -26,7 +26,8 @@ var PATHS = {
   sun: '<circle cx="12" cy="12" r="4"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6 7 7M17 17l1.4 1.4M5.6 18.4 7 17M17 7l1.4-1.4"/>',
   moon: '<path d="M20 14.5A8 8 0 0 1 9.5 4 8 8 0 1 0 20 14.5z"/>',
   search: '<circle cx="11" cy="11" r="6"/><path d="m16 16 4 4"/>',
-  install: '<rect x="7" y="3" width="10" height="18" rx="2"/><path d="M12 8v6"/><path d="m9.5 11.8 2.5 2.7 2.5-2.7"/>'
+  install: '<rect x="7" y="3" width="10" height="18" rx="2"/><path d="M12 8v6"/><path d="m9.5 11.8 2.5 2.7 2.5-2.7"/>',
+  cube: '<path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16zM3.3 7 12 12l8.7-5M12 22V12"/>'
 };
 
 export function icon(name, size) {

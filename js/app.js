@@ -43,7 +43,7 @@ var ROUTES = [
   [/^logbook$/, 'learn', function () { return mod.logbook(); }],
   [/^plan$/, 'learn', function () { return study.plan(); }],
   [/^studio$/, 'studio', function () { return studio.hub(); }],
-  [/^studio\/([a-z-]+)$/, 'studio', function (p) { return studio.sim(p); }],
+  [/^studio\/([a-z0-9-]+)$/, 'studio', function (p) { return studio.sim(p); }],
   [/^tools$/, 'studio', function () { return tools.render(); }],
   [/^progress$/, 'progress', function () { return progress.render(); }],
   [/^settings$/, 'settings', function () { return settings.render(); }],

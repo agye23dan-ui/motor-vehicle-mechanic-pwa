@@ -1,7 +1,7 @@
 /* Service worker. Generated into sw.js by scripts/build.js, which fills in VERSION and FILES. */
 'use strict';
 
-var VERSION = 'simfix20261029';
+var VERSION = 'ed5b5957a272';
 var CACHE = 'mvm-' + VERSION;
 var FILES = [
   "css/app.css",
@@ -33,6 +33,7 @@ var FILES = [
   "data/modules/m19.js",
   "data/modules/m20.js",
   "data/modules/m21.js",
+  "engine.html",
   "fonts/archivo-variable.woff2",
   "fonts/atkinson-hyperlegible-latin-400-normal.woff2",
   "fonts/atkinson-hyperlegible-latin-700-normal.woff2",
@@ -76,6 +77,7 @@ var FILES = [
   "js/sims/circuit.js",
   "js/sims/cooling.js",
   "js/sims/engine.js",
+  "js/sims/engine3d.js",
   "js/sims/gearbox.js",
   "js/sims/kit.js",
   "js/sims/scantool.js",
@@ -99,6 +101,8 @@ var FILES = [
   "js/views/tools.js",
   "manifest.webmanifest"
 ];
+var LIB_CACHE = 'lib-3d';
+var LIB_HOSTS = ['cdn.tailwindcss.com', 'cdnjs.cloudflare.com', 'cdn.jsdelivr.net', 'fonts.googleapis.com', 'fonts.gstatic.com'];
 
 self.addEventListener('install', function (event) {
   event.waitUntil(
@@ -133,10 +137,26 @@ self.addEventListener('fetch', function (event) {
   var req = event.request;
   if (req.method !== 'GET') return;
   var url = new URL(req.url);
-  if (url.origin !== self.location.origin) return;
+  if (url.origin !== self.location.origin) {
+    /* The 3D engine page loads its libraries from these hosts. Keep a copy after the first visit so it also opens offline.
+       The cache has its own name so it survives app updates. */
+    if (LIB_HOSTS.indexOf(url.hostname) < 0) return;
+    event.respondWith(
+      caches.open(LIB_CACHE).then(function (c) {
+        return c.match(req).then(function (hit) {
+          if (hit) return hit;
+          return fetch(req).then(function (res) {
+            if (res.ok || res.type === 'opaque') c.put(req, res.clone());
+            return res;
+          });
+        });
+      })
+    );
+    return;
+  }
 
-  /* Every page load gets the app shell, so any #/route works offline. */
-  if (req.mode === 'navigate') {
+  /* Every page load gets the app shell, so any #/route works offline. The 3D engine page is its own page. */
+  if (req.mode === 'navigate' && !/\/engine\.html$/.test(url.pathname)) {
     event.respondWith(
       caches.match('index.html').then(function (hit) {
         return hit || fetch(req);

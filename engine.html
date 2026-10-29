@@ -1,0 +1,1400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Engine Exploded View & Assembly Visualizer</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #ffffff;
+            color: #c9d1d9;
+            overflow: hidden;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+        }
+
+        /* Phone browsers count the hidden address bar in 100vh, which pushed the bottom controls off screen. */
+        html, body { height: 100%; }
+        body { height: 100dvh !important; }
+        @media (max-width: 639px) {
+            .part-label { font-size: 9px; padding: 1px 5px; }
+        }
+
+        #canvas-container {
+            width: 100vw;
+            height: 100vh;
+            height: 100dvh;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1;
+            background-color: #ffffff;
+        }
+
+        /* 3D Label Overlay Container */
+        #labels-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 10;
+            overflow: hidden;
+        }
+
+        .part-label {
+            position: absolute;
+            transform: translate(-50%, -50%);
+            background: rgba(13, 17, 23, 0.85);
+            border: 1px solid rgba(56, 139, 253, 0.4);
+            color: #58a6ff;
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            white-space: nowrap;
+            pointer-events: auto;
+            cursor: pointer;
+            backdrop-filter: blur(4px);
+            transition: all 0.2s ease, opacity 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+        }
+
+        .part-label:hover {
+            border-color: #58a6ff;
+            background: rgba(31, 111, 235, 0.9);
+            color: #ffffff;
+            scale: 1.05;
+        }
+
+        .part-label.active {
+            background: #238636;
+            border-color: #2ea043;
+            color: #ffffff;
+        }
+
+        /* Custom Scrollbars */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(22, 27, 34, 0.8);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #30363d;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #8b949e;
+        }
+
+        /* Glassmorphic Panel Styling */
+        .glass-panel {
+            background: rgba(23, 54, 86, 0.85);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(48, 54, 61, 0.8);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+
+        /* Custom Slider Styling */
+        input[type=range] {
+            -webkit-appearance: none;
+            background: transparent;
+        }
+        input[type=range]:focus {
+            outline: none;
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 8px;
+            cursor: pointer;
+            background: #21262d;
+            border-radius: 4px;
+            border: 1px solid #30363d;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            height: 18px;
+            width: 18px;
+            border-radius: 50%;
+            background: #58a6ff;
+            cursor: pointer;
+            -webkit-appearance: none;
+            margin-top: -6px;
+            box-shadow: 0 0 10px rgba(88, 166, 255, 0.5);
+            transition: background 0.2s;
+        }
+        input[type=range]::-webkit-slider-thumb:hover {
+            background: #79c0ff;
+        }
+
+        .pulse-glow {
+            animation: pulseGlow 2s infinite;
+        }
+        @keyframes pulseGlow {
+            0%, 100% { box-shadow: 0 0 5px rgba(88, 166, 255, 0.3); }
+            50% { box-shadow: 0 0 15px rgba(88, 166, 255, 0.7); }
+        }
+    </style>
+
+    <!-- Three.js (r128) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <!-- OrbitControls -->
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <!-- GSAP for Smooth Camera & Component Animations -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+</head>
+<body class="w-full h-screen overflow-hidden">
+
+    <!-- Canvas Container for Three.js Render -->
+    <div id="canvas-container"></div>
+
+    <!-- 3D HTML Labels Overlay -->
+    <div id="labels-container"></div>
+
+    <!-- UI Overlay Layer -->
+    <div class="relative z-20 pointer-events-none w-full h-full flex flex-col justify-between p-2 sm:p-4 md:p-6">
+
+        <!-- Header Bar -->
+        <header class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 w-full">
+            <div class="glass-panel px-3 py-2 sm:px-4 sm:py-3 rounded-xl pointer-events-auto flex items-center space-x-3">
+                <a href="index.html#/studio" target="_top" title="Back to Simulation Studio" class="p-2 bg-blue-600/20 hover:bg-blue-600/40 text-blue-300 hover:text-white rounded-lg transition flex items-center space-x-1.5 text-xs font-semibold">
+                    <i class="fa-solid fa-arrow-left"></i>
+                    <span class="hidden sm:inline">Studio</span>
+                </a>
+                <div class="w-px h-6 bg-gray-700/60 hidden sm:block"></div>
+                <div class="p-2 bg-blue-600/20 text-blue-400 rounded-lg hidden sm:block">
+                    <i class="fa-solid fa-gears text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-white text-sm sm:text-base md:text-lg leading-tight">Engine Exploded View</h1>
+                    <p class="text-xs text-gray-400 hidden sm:block">Interactive 3D Assembly & Disassembly Simulator</p>
+                </div>
+            </div>
+
+            <!-- View Presets & Quick Toggles -->
+            <div class="glass-panel p-1 sm:p-1.5 rounded-xl pointer-events-auto flex items-center justify-between sm:justify-start sm:space-x-1">
+                <button id="btn-preset-iso" title="Isometric View" class="px-2.5 sm:px-3 py-2 sm:py-1.5 rounded-lg text-xs font-medium hover:bg-gray-800 text-gray-300 hover:text-white transition flex items-center space-x-1">
+                    <i class="fa-solid fa-cube"></i> <span class="hidden sm:inline">Iso</span>
+                </button>
+                <button id="btn-preset-front" title="Front View" class="px-2.5 sm:px-3 py-2 sm:py-1.5 rounded-lg text-xs font-medium hover:bg-gray-800 text-gray-300 hover:text-white transition flex items-center space-x-1">
+                    <i class="fa-solid fa-square"></i> <span class="hidden sm:inline">Front</span>
+                </button>
+                <button id="btn-preset-top" title="Top View" class="px-2.5 sm:px-3 py-2 sm:py-1.5 rounded-lg text-xs font-medium hover:bg-gray-800 text-gray-300 hover:text-white transition flex items-center space-x-1">
+                    <i class="fa-solid fa-arrow-down-long"></i> <span class="hidden sm:inline">Top</span>
+                </button>
+                <button id="btn-preset-side" title="Side View" class="px-2.5 sm:px-3 py-2 sm:py-1.5 rounded-lg text-xs font-medium hover:bg-gray-800 text-gray-300 hover:text-white transition flex items-center space-x-1">
+                    <i class="fa-solid fa-vector-square"></i> <span class="hidden sm:inline">Side</span>
+                </button>
+                <div class="w-px h-5 bg-gray-700 mx-1"></div>
+                <button id="btn-toggle-labels" class="px-2.5 sm:px-3 py-2 sm:py-1.5 rounded-lg text-xs font-medium bg-blue-600/30 text-blue-300 hover:bg-blue-600/50 transition flex items-center space-x-1">
+                    <i class="fa-solid fa-tag"></i> <span class="hidden md:inline">Labels</span>
+                </button>
+                <button id="btn-toggle-stage" title="Toggle Stage Theme (White/Dark)" class="px-2.5 sm:px-3 py-2 sm:py-1.5 rounded-lg text-xs font-medium bg-white/10 text-white hover:bg-white/20 transition flex items-center space-x-1">
+                    <i id="stage-icon" class="fa-solid fa-sun text-amber-400"></i> <span id="stage-label" class="hidden md:inline">White Stage</span>
+                </button>
+                <button id="btn-fullscreen" title="Toggle Fullscreen" class="px-2.5 sm:px-3 py-2 sm:py-1.5 rounded-lg text-xs font-medium hover:bg-gray-800 text-gray-300 hover:text-white transition flex items-center space-x-1">
+                    <i id="fs-icon" class="fa-solid fa-expand"></i>
+                </button>
+                <button id="btn-reset-view" title="Reset View" class="px-2.5 sm:px-3 py-2 sm:py-1.5 rounded-lg text-xs font-medium hover:bg-gray-800 text-gray-300 hover:text-white transition">
+                    <i class="fa-solid fa-arrows-to-dot"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Workspace Middle Section (Left & Right Drawers) -->
+        <div class="flex-1 my-4 flex justify-between items-start pointer-events-none relative overflow-hidden">
+            
+            <!-- Left Sidebar: Parts Directory -->
+            <div id="parts-sidebar" class="glass-panel absolute left-0 top-0 md:static w-72 max-h-[calc(100vh-180px)] rounded-xl p-3 flex flex-col pointer-events-auto transition-all duration-300 transform -translate-x-full md:translate-x-0">
+                <div class="flex items-center justify-between mb-3 pb-2 border-b border-gray-700/60">
+                    <h2 class="text-xs font-bold uppercase tracking-wider text-gray-300 flex items-center space-x-2">
+                        <i class="fa-solid fa-list-check text-blue-400"></i>
+                        <span>Components Directory</span>
+                    </h2>
+                    <span id="part-count-badge" class="bg-gray-800 text-gray-400 text-[10px] px-2 py-0.5 rounded-full font-mono">13 Parts</span>
+                </div>
+                
+                <div id="parts-list" class="flex-1 overflow-y-auto pr-1 space-y-1">
+                    <!-- Dynamic Part Items Injected Here -->
+                </div>
+            </div>
+
+            <!-- Right Inspector Drawer: Selected Component Details -->
+            <div id="info-card" class="glass-panel absolute left-1 right-1 bottom-0 md:static md:left-auto md:right-auto md:w-80 max-h-full overflow-y-auto rounded-xl p-3 sm:p-4 pointer-events-auto transition-all duration-300 transform translate-x-full opacity-0">
+                <div class="flex justify-between items-start pb-3 border-b border-gray-700/60">
+                    <div>
+                        <span id="card-part-step" class="text-[10px] font-mono px-2 py-0.5 bg-blue-900/60 text-blue-300 rounded border border-blue-700/50">STEP 01</span>
+                        <h3 id="card-part-title" class="text-base font-bold text-white mt-1">Engine Block</h3>
+                    </div>
+                    <button id="btn-close-card" class="text-gray-400 hover:text-white p-1 rounded-lg hover:bg-gray-800 transition">
+                        <i class="fa-solid fa-xmark text-lg"></i>
+                    </button>
+                </div>
+
+                <div class="mt-3 space-y-3 text-xs text-gray-300">
+                    <div>
+                        <span class="text-gray-500 font-semibold block uppercase text-[10px] tracking-wider">Role & Function</span>
+                        <p id="card-part-desc" class="mt-0.5 leading-relaxed text-gray-300">Central backbone housing cylinders, crank passages, and coolant ducts.</p>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-2 pt-2 border-t border-gray-800">
+                        <div class="bg-gray-900/50 p-2 rounded-lg border border-gray-800">
+                            <span class="text-gray-500 text-[10px] block">Material Spec</span>
+                            <span id="card-part-mat" class="font-semibold text-gray-200">Cast Iron / Alloy</span>
+                        </div>
+                        <div class="bg-gray-900/50 p-2 rounded-lg border border-gray-800">
+                            <span class="text-gray-500 text-[10px] block">Assembly Order</span>
+                            <span id="card-part-order" class="font-semibold text-gray-200">Base Component</span>
+                        </div>
+                    </div>
+
+                    <div class="pt-2 flex space-x-2">
+                        <button id="btn-isolate-part" class="flex-1 py-1.5 px-3 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-xs font-semibold transition flex items-center justify-center space-x-1.5">
+                            <i class="fa-solid fa-crosshairs"></i>
+                            <span>Focus Camera</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Controller Panel -->
+        <footer class="glass-panel p-3 sm:p-4 rounded-xl pointer-events-auto max-w-4xl mx-auto w-full flex flex-col md:flex-row items-center justify-between gap-3 sm:gap-4">
+            
+            <!-- Explode Slider & Progress -->
+            <div class="flex-1 w-full flex items-center space-x-3 sm:space-x-4">
+                <span class="text-xs font-semibold text-gray-400 whitespace-nowrap flex items-center space-x-1.5">
+                    <i class="fa-solid fa-arrows-up-down-left-right text-blue-400"></i>
+                    <span class="hidden sm:inline">Explode View</span>
+                </span>
+                
+                <input id="explode-slider" type="range" min="0" max="100" value="70" class="w-full">
+                
+                <span id="slider-val" class="text-xs font-mono font-bold text-blue-400 w-10 text-right">70%</span>
+            </div>
+
+            <!-- Action Controls Buttons -->
+            <div class="flex items-center space-x-2 w-full md:w-auto md:shrink-0">
+                <button id="btn-step-prev" title="Previous Step" class="flex-1 md:flex-none px-3 py-2.5 sm:py-2 bg-gray-800 hover:bg-gray-700 text-gray-200 rounded-lg text-xs font-semibold transition border border-gray-700">
+                    <i class="fa-solid fa-backward-step mr-1"></i> Prev<span class="hidden sm:inline"> Step</span>
+                </button>
+
+                <button id="btn-play-pause" class="flex-1 md:flex-none justify-center px-4 py-2.5 sm:py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-xs font-bold transition flex items-center space-x-1.5 shadow-lg shadow-blue-600/30">
+                    <i id="play-icon" class="fa-solid fa-play"></i>
+                    <span id="play-text">Auto Animate</span>
+                </button>
+
+                <button id="btn-step-next" title="Next Step" class="flex-1 md:flex-none px-3 py-2.5 sm:py-2 bg-gray-800 hover:bg-gray-700 text-gray-200 rounded-lg text-xs font-semibold transition border border-gray-700">
+                    Next<span class="hidden sm:inline"> Step</span> <i class="fa-solid fa-forward-step ml-1"></i>
+                </button>
+            </div>
+        </footer>
+
+    </div>
+
+    <!-- Application Script -->
+    <script>
+        // --- DATA SPECIFICATION & METADATA ---
+        const ENGINE_PARTS_DATA = [
+            {
+                id: 'oilPanDrainBolt',
+                name: 'Oil Pan Drain Bolt',
+                desc: 'Threaded plug at lowest point of oil pan removed to drain engine oil during service.',
+                material: 'Steel Bolt',
+                order: 1,
+                vector: [0, -2.6, 0],
+                color: 0xcccccc,
+                metalness: 0.9,
+                roughness: 0.2
+            },
+            {
+                id: 'drainBoltWasher',
+                name: 'Drain Bolt Crush Washer',
+                desc: 'Soft aluminum/copper washer forming leak-proof seal under drain bolt.',
+                material: 'Copper / Soft Alloy',
+                order: 2,
+                vector: [0, -2.2, 0],
+                color: 0xd97706,
+                metalness: 0.7,
+                roughness: 0.3
+            },
+            {
+                id: 'oilPan',
+                name: 'Oil Pan / Sump',
+                desc: 'Bottom reservoir collecting oil for circulation by oil pump.',
+                material: 'Pressed Steel / Alloy',
+                order: 3,
+                vector: [0, -1.6, 0],
+                color: 0x1e293b,
+                metalness: 0.6,
+                roughness: 0.4
+            },
+            {
+                id: 'oilPanGasket',
+                name: 'Oil Pan Gasket',
+                desc: 'Flexible perimeter seal preventing oil leakage between block and pan.',
+                material: 'High-Temp Rubber/Silicone',
+                order: 4,
+                vector: [0, -1.0, 0],
+                color: 0xea580c,
+                metalness: 0.1,
+                roughness: 0.8
+            },
+            {
+                id: 'engineBlock',
+                name: 'Engine Block',
+                desc: 'Structural core featuring 4 inline cylinder bores, coolant jackets, crankcase structure.',
+                material: 'Cast Iron / Aluminum',
+                order: 5,
+                vector: [0, 0, 0],
+                color: 0x334155,
+                metalness: 0.7,
+                roughness: 0.3
+            },
+            {
+                id: 'oilFilter',
+                name: 'Oil Filter',
+                desc: 'Canister filter cleansing engine oil of metallic particles and debris.',
+                material: 'Steel Housing',
+                order: 6,
+                vector: [1.8, -0.2, 1.2],
+                color: 0x1d4ed8,
+                metalness: 0.8,
+                roughness: 0.2
+            },
+            {
+                id: 'timingBeltDrivePulley',
+                name: 'Timing Belt Drive Pulley',
+                desc: 'Crankshaft gear driving timing belt to synchronize valve camshaft.',
+                material: 'Hardened Steel',
+                order: 7,
+                vector: [0, -0.4, 2.5],
+                color: 0x475569,
+                metalness: 0.9,
+                roughness: 0.2
+            },
+            {
+                id: 'waterPumpGasket',
+                name: 'Water Pump Gasket',
+                desc: 'Sealing ring ensuring pressurized coolant stays within pump housing.',
+                material: 'Elastomer Ring',
+                order: 8,
+                vector: [1.6, 0, 2.0],
+                color: 0xca8a04,
+                metalness: 0.2,
+                roughness: 0.7
+            },
+            {
+                id: 'waterPump',
+                name: 'Water Pump Assembly',
+                desc: 'Impeller pump circulating coolant through block and cylinder head.',
+                material: 'Aluminum Cast',
+                order: 9,
+                vector: [2.2, 0, 2.4],
+                color: 0x475569,
+                metalness: 0.8,
+                roughness: 0.3
+            },
+            {
+                id: 'headGasket',
+                name: 'Cylinder Head Gasket',
+                desc: 'Critical high-pressure multi-layer steel gasket sealing combustion chambers & oil channels.',
+                material: 'MLS / Composite Steel',
+                order: 10,
+                vector: [0, 1.0, 0],
+                color: 0xf97316,
+                metalness: 0.5,
+                roughness: 0.5
+            },
+            {
+                id: 'cylinderHead',
+                name: 'Cylinder Head',
+                desc: 'Houses intake/exhaust valves, combustion chambers, spark plugs, and camshaft channels.',
+                material: 'Cast Aluminum Alloy',
+                order: 11,
+                vector: [0, 1.8, 0],
+                color: 0x64748b,
+                metalness: 0.7,
+                roughness: 0.3
+            },
+            {
+                id: 'camshaftPulley',
+                name: 'Camshaft Pulley',
+                desc: 'Front timing gear driven by timing belt to rotate valve camshafts.',
+                material: 'Machined Steel',
+                order: 12,
+                vector: [0, 2.2, 2.5],
+                color: 0x3b82f6,
+                metalness: 0.8,
+                roughness: 0.2
+            },
+            {
+                id: 'distributorORing',
+                name: 'Distributor O-Ring',
+                desc: 'Rubber seal keeping cylinder head oil inside distributor shaft bore.',
+                material: 'Viton Synthetic Rubber',
+                order: 13,
+                vector: [-2.0, 2.2, 0],
+                color: 0xd97706,
+                metalness: 0.1,
+                roughness: 0.9
+            },
+            {
+                id: 'distributor',
+                name: 'Distributor Assembly',
+                desc: 'High-voltage rotor mechanism routing ignition spark to individual cylinders.',
+                material: 'Die-cast Alloy & Bakelite',
+                order: 14,
+                vector: [-2.8, 2.2, 0],
+                color: 0xeab308,
+                metalness: 0.7,
+                roughness: 0.3
+            },
+            {
+                id: 'exhaustManifoldGasket',
+                name: 'Exhaust Manifold Gasket',
+                desc: 'High-temp thermal gasket sealing hot exhaust gas ports.',
+                material: 'Multi-layer Stainless',
+                order: 15,
+                vector: [-1.4, 1.6, 1.2],
+                color: 0xea580c,
+                metalness: 0.4,
+                roughness: 0.6
+            },
+            {
+                id: 'exhaustManifold',
+                name: 'Exhaust Manifold',
+                desc: 'Tubular headers gathering cylinder exhaust fumes into main exhaust pipe.',
+                material: 'Cast Iron / Stainless Steel',
+                order: 16,
+                vector: [-2.4, 1.4, 1.8],
+                color: 0x2563eb,
+                metalness: 0.6,
+                roughness: 0.4
+            },
+            {
+                id: 'intakeManifoldGasket',
+                name: 'Intake Manifold Gasket',
+                desc: 'Seals fuel-air induction channels between head and intake plenum.',
+                material: 'Composite / Rubber',
+                order: 17,
+                vector: [1.4, 1.8, -1.2],
+                color: 0xea580c,
+                metalness: 0.2,
+                roughness: 0.7
+            },
+            {
+                id: 'intakeManifold',
+                name: 'Intake Manifold',
+                desc: 'Plenum distribution network directing air/fuel mixture into intake valves.',
+                material: 'Aluminum / Molded Polymer',
+                order: 18,
+                vector: [2.5, 2.0, -1.8],
+                color: 0x1d4ed8,
+                metalness: 0.7,
+                roughness: 0.3
+            },
+            {
+                id: 'cylinderHeadCoverGasket',
+                name: 'Cylinder Head Cover Gasket',
+                desc: 'Rubber perimeter gasket sealing oil beneath top valve cover.',
+                material: 'Silicone Rubber',
+                order: 19,
+                vector: [0, 2.7, 0],
+                color: 0xca8a04,
+                metalness: 0.1,
+                roughness: 0.8
+            },
+            {
+                id: 'rubberGrommets',
+                name: 'Valve Cover Grommets',
+                desc: 'Vibration-damping rubber washers under valve cover hold-down bolts.',
+                material: 'Synthetic Rubber',
+                order: 20,
+                vector: [0, 3.1, 0],
+                color: 0x0f172a,
+                metalness: 0.1,
+                roughness: 0.9
+            },
+            {
+                id: 'cylinderHeadCover',
+                name: 'Cylinder Head Cover (Rocker Cover)',
+                desc: 'Top protective aluminum cover enclosing valve train and camshaft assembly.',
+                material: 'Cast Alloy / Composite',
+                order: 21,
+                vector: [0, 3.5, 0],
+                color: 0x4338ca,
+                metalness: 0.7,
+                roughness: 0.3
+            }
+        ];
+
+        // --- GLOBAL THREE.JS SYSTEM VARIABLES ---
+        let scene, camera, renderer, controls;
+        let partsGroup = new THREE.Group();
+        const partsMap = new Map();
+        const labelsMap = new Map();
+        
+        let currentExplodeRatio = 0.7; // Start at 70% exploded
+        let isAutoAnimating = false;
+        let animationTween = null;
+        let selectedPartId = null;
+        let labelsVisible = window.innerWidth >= 640;   // part tags crowd a phone screen, so they start hidden there
+        let stageMode = 'white'; // White stage by default
+        let floorMesh = null;
+        let gridHelper = null;
+        let stagePlatform = null;
+        let stageRing = null;
+
+        // Raycasting & Interaction
+        const raycaster = new THREE.Raycaster();
+        const mouse = new THREE.Vector2();
+
+        // --- INITIALIZATION ---
+        window.onload = function() {
+            initScene();
+            buildEngineGeometry();
+            setupUI();
+            setupEvents();
+            updateExplodePositions(currentExplodeRatio);
+            animate();
+        };
+
+        // --- SCENE SETUP ---
+        function initScene() {
+            const container = document.getElementById('canvas-container');
+
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0xffffff);
+            scene.fog = new THREE.Fog(0xffffff, 25, 65);
+
+            camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
+            fitFov();
+            camera.position.set(12, 10, 14);
+
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: "high-performance" });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            renderer.toneMapping = THREE.ACESFilmicToneMapping;
+            renderer.toneMappingExposure = 1.08;
+            container.appendChild(renderer.domElement);
+
+            // OrbitControls Setup
+            controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.05;
+            controls.maxDistance = 35;
+            controls.minDistance = 3;
+            controls.target.set(0, 0.8, 0);
+
+            // Studio Lighting for White Stage
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.95);
+            scene.add(ambientLight);
+
+            const dirLight1 = new THREE.DirectionalLight(0xffffff, 1.4);
+            dirLight1.position.set(12, 22, 16);
+            dirLight1.castShadow = true;
+            dirLight1.shadow.mapSize.width = 2048;
+            dirLight1.shadow.mapSize.height = 2048;
+            dirLight1.shadow.camera.near = 1;
+            dirLight1.shadow.camera.far = 50;
+            dirLight1.shadow.camera.left = -12;
+            dirLight1.shadow.camera.right = 12;
+            dirLight1.shadow.camera.top = 12;
+            dirLight1.shadow.camera.bottom = -12;
+            dirLight1.shadow.bias = -0.0005;
+            dirLight1.shadow.radius = 2.5;
+            scene.add(dirLight1);
+
+            const dirLight2 = new THREE.DirectionalLight(0x60a5fa, 0.6);
+            dirLight2.position.set(-15, 12, -10);
+            scene.add(dirLight2);
+
+            const fillLight = new THREE.DirectionalLight(0xfef08a, 0.35);
+            fillLight.position.set(0, -5, 10);
+            scene.add(fillLight);
+
+            // 1. Soft Shadow-Receiving Ground Plane on the White Stage
+            const floorGeo = new THREE.PlaneGeometry(80, 80);
+            const floorMat = new THREE.ShadowMaterial({ opacity: 0.16 });
+            floorMesh = new THREE.Mesh(floorGeo, floorMat);
+            floorMesh.rotation.x = -Math.PI / 2;
+            floorMesh.position.y = -5.2;
+            floorMesh.receiveShadow = true;
+            scene.add(floorMesh);
+
+            // 2. Circular Studio Pedestal/Platform on the Stage
+            const platformGeo = new THREE.CylinderGeometry(7.5, 7.5, 0.05, 64);
+            const platformMat = new THREE.MeshStandardMaterial({
+                color: 0xf8fafc,
+                roughness: 0.85,
+                metalness: 0.05
+            });
+            stagePlatform = new THREE.Mesh(platformGeo, platformMat);
+            stagePlatform.position.y = -5.225;
+            stagePlatform.receiveShadow = true;
+            scene.add(stagePlatform);
+
+            // 3. Circular Stage Platform Accent Ring
+            const ringGeo = new THREE.RingGeometry(7.45, 7.55, 64);
+            const ringMat = new THREE.MeshBasicMaterial({ color: 0xcbd5e1, side: THREE.DoubleSide });
+            stageRing = new THREE.Mesh(ringGeo, ringMat);
+            stageRing.rotation.x = -Math.PI / 2;
+            stageRing.position.y = -5.195;
+            scene.add(stageRing);
+
+            // 4. Clean Architectural Stage Grid
+            gridHelper = new THREE.GridHelper(30, 30, 0x94a3b8, 0xe2e8f0);
+            gridHelper.position.y = -5.19;
+            scene.add(gridHelper);
+
+            scene.add(partsGroup);
+        }
+
+        // --- PROCEDURAL 3D ENGINE GEOMETRIES BUILDER ---
+        function buildEngineGeometry() {
+            ENGINE_PARTS_DATA.forEach(data => {
+                const partMesh = createPartMesh(data);
+                partMesh.userData = { 
+                    id: data.id, 
+                    baseVector: new THREE.Vector3(...data.vector),
+                    assembledPos: getAssembledPosition(data),
+                    explodedPos: getExplodedPosition(data),
+                    data: data
+                };
+
+                partsGroup.add(partMesh);
+                partsMap.set(data.id, partMesh);
+
+                // Create HTML label
+                createHTMLLabel(data);
+            });
+        }
+
+        // Calculate assembled state location
+        function getAssembledPosition(data) {
+            // Tight stack coordinates
+            const yMap = {
+                oilPanDrainBolt: -1.8,
+                drainBoltWasher: -1.72,
+                oilPan: -1.3,
+                oilPanGasket: -0.75,
+                engineBlock: 0,
+                oilFilter: [1.1, -0.2, 0.5],
+                timingBeltDrivePulley: [0, -0.3, 1.45],
+                waterPumpGasket: [1.1, 0, 1.35],
+                waterPump: [1.1, 0, 1.5],
+                headGasket: 0.78,
+                cylinderHead: 1.35,
+                camshaftPulley: [0, 1.5, 1.45],
+                distributorORing: [-1.42, 1.5, 0],
+                distributor: [-1.8, 1.5, 0],
+                exhaustManifoldGasket: [-0.95, 1.3, 0.5],
+                exhaustManifold: [-1.4, 1.2, 0.5],
+                intakeManifoldGasket: [0.95, 1.4, -0.5],
+                intakeManifold: [1.4, 1.4, -0.5],
+                cylinderHeadCoverGasket: 1.95,
+                rubberGrommets: 2.38,
+                cylinderHeadCover: 2.2
+            };
+
+            const val = yMap[data.id];
+            if (Array.isArray(val)) {
+                return new THREE.Vector3(val[0], val[1], val[2]);
+            }
+            return new THREE.Vector3(0, val !== undefined ? val : 0, 0);
+        }
+
+        function getExplodedPosition(data) {
+            const assembled = getAssembledPosition(data);
+            const vec = new THREE.Vector3(...data.vector);
+            return assembled.clone().add(vec.multiplyScalar(1.2));
+        }
+
+        // Procedural Mesh Generator for specific engine parts
+        function createPartMesh(data) {
+            const group = new THREE.Group();
+            const mat = new THREE.MeshStandardMaterial({
+                color: data.color,
+                metalness: data.metalness,
+                roughness: data.roughness,
+                envMapIntensity: 1.0
+            });
+
+            switch(data.id) {
+                case 'engineBlock': {
+                    // Main cast cylinder block
+                    const blockGeo = new THREE.BoxGeometry(2.4, 1.4, 2.6);
+                    const blockMesh = new THREE.Mesh(blockGeo, mat);
+                    group.add(blockMesh);
+
+                    // 4 Cylinder Bores
+                    const boreMat = new THREE.MeshStandardMaterial({ color: 0x111111, metalness: 0.9, roughness: 0.1 });
+                    for(let i = -0.9; i <= 0.9; i += 0.6) {
+                        const boreGeo = new THREE.CylinderGeometry(0.24, 0.24, 1.42, 24);
+                        const bore = new THREE.Mesh(boreGeo, boreMat);
+                        bore.position.set(0, 0, i);
+                        group.add(bore);
+                    }
+                    // Side cooling ribs
+                    const ribGeo = new THREE.BoxGeometry(2.5, 0.05, 2.4);
+                    for(let r = -0.4; r <= 0.4; r += 0.2) {
+                        const rib = new THREE.Mesh(ribGeo, mat);
+                        rib.position.y = r;
+                        group.add(rib);
+                    }
+                    break;
+                }
+
+                case 'cylinderHead': {
+                    const headGeo = new THREE.BoxGeometry(2.3, 0.8, 2.5);
+                    const headMesh = new THREE.Mesh(headGeo, mat);
+                    group.add(headMesh);
+
+                    // Dual Camshaft Channels top grooves
+                    const grooveGeo = new THREE.CylinderGeometry(0.18, 0.18, 2.4, 16);
+                    const g1 = new THREE.Mesh(grooveGeo, mat);
+                    g1.rotation.x = Math.PI / 2;
+                    g1.position.set(-0.5, 0.35, 0);
+                    const g2 = g1.clone();
+                    g2.position.set(0.5, 0.35, 0);
+                    group.add(g1, g2);
+                    break;
+                }
+
+                case 'cylinderHeadCover': {
+                    // Sculpted valve cover
+                    const coverGeo = new THREE.CylinderGeometry(1.1, 1.15, 2.5, 12, 1, false, 0, Math.PI);
+                    const coverMesh = new THREE.Mesh(coverGeo, mat);
+                    coverMesh.rotation.z = Math.PI / 2;
+                    coverMesh.rotation.y = Math.PI / 2;
+                    coverMesh.scale.set(0.8, 1, 0.5);
+                    group.add(coverMesh);
+
+                    // Oil Cap on top
+                    const capGeo = new THREE.CylinderGeometry(0.2, 0.2, 0.1, 16);
+                    const cap = new THREE.Mesh(capGeo, new THREE.MeshStandardMaterial({ color: 0xdd2222, roughness: 0.3 }));
+                    cap.position.set(-0.5, 0.35, 0.6);
+                    group.add(cap);
+                    break;
+                }
+
+                case 'oilPan': {
+                    const panShape = new THREE.BoxGeometry(2.2, 0.7, 2.5);
+                    const pan = new THREE.Mesh(panShape, mat);
+                    pan.scale.set(1, 0.8, 1);
+                    // Sump taper bottom
+                    const sumpGeo = new THREE.BoxGeometry(1.6, 0.4, 1.2);
+                    const sump = new THREE.Mesh(sumpGeo, mat);
+                    sump.position.set(0, -0.4, -0.4);
+                    group.add(pan, sump);
+                    break;
+                }
+
+                case 'headGasket':
+                case 'oilPanGasket':
+                case 'cylinderHeadCoverGasket':
+                case 'exhaustManifoldGasket':
+                case 'intakeManifoldGasket': {
+                    // Detailed cut-out gaskets
+                    let w = 2.3, h = 2.5;
+                    if (data.id.includes('exhaust')) { w = 0.2; h = 2.2; }
+                    if (data.id.includes('intake')) { w = 0.2; h = 2.2; }
+                    const gGeo = new THREE.BoxGeometry(w, 0.04, h);
+                    const gMesh = new THREE.Mesh(gGeo, mat);
+                    group.add(gMesh);
+                    break;
+                }
+
+                case 'camshaftPulley':
+                case 'timingBeltDrivePulley': {
+                    const radius = data.id.includes('cam') ? 0.55 : 0.38;
+                    const gearGeo = new THREE.CylinderGeometry(radius, radius, 0.18, 32);
+                    const gear = new THREE.Mesh(gearGeo, mat);
+                    gear.rotation.x = Math.PI / 2;
+
+                    // Center nut
+                    const nutGeo = new THREE.CylinderGeometry(0.12, 0.12, 0.22, 6);
+                    const nut = new THREE.Mesh(nutGeo, new THREE.MeshStandardMaterial({ color: 0x94a3b8, metalness: 0.9 }));
+                    nut.rotation.x = Math.PI / 2;
+                    group.add(gear, nut);
+                    break;
+                }
+
+                case 'exhaustManifold': {
+                    // Curved 4-into-1 exhaust runners
+                    for (let i = -0.85; i <= 0.85; i += 0.55) {
+                        const curve = new THREE.CatmullRomCurve3([
+                            new THREE.Vector3(0, 0, i),
+                            new THREE.Vector3(-0.6, -0.2, i * 0.7),
+                            new THREE.Vector3(-1.0, -0.8, 0)
+                        ]);
+                        const tubeGeo = new THREE.TubeGeometry(curve, 16, 0.1, 12, false);
+                        const tube = new THREE.Mesh(tubeGeo, mat);
+                        group.add(tube);
+                    }
+                    // Collector pipe flange
+                    const flangeGeo = new THREE.CylinderGeometry(0.25, 0.25, 0.3, 16);
+                    const flange = new THREE.Mesh(flangeGeo, mat);
+                    flange.position.set(-1.0, -0.95, 0);
+                    group.add(flange);
+                    break;
+                }
+
+                case 'intakeManifold': {
+                    // Curved intake runners & plenum box
+                    const plenumGeo = new THREE.BoxGeometry(0.7, 0.6, 2.2);
+                    const plenum = new THREE.Mesh(plenumGeo, mat);
+                    plenum.position.set(0.6, 0.1, 0);
+                    group.add(plenum);
+
+                    for (let i = -0.85; i <= 0.85; i += 0.55) {
+                        const tubeGeo = new THREE.CylinderGeometry(0.09, 0.09, 0.7, 12);
+                        const tube = new THREE.Mesh(tubeGeo, mat);
+                        tube.rotation.z = Math.PI / 3;
+                        tube.position.set(0.2, 0, i);
+                        group.add(tube);
+                    }
+                    break;
+                }
+
+                case 'distributor': {
+                    // Ignition distributor body & cap
+                    const bodyGeo = new THREE.CylinderGeometry(0.3, 0.25, 0.6, 16);
+                    const body = new THREE.Mesh(bodyGeo, mat);
+                    body.rotation.z = Math.PI / 2;
+                    
+                    const capGeo = new THREE.CylinderGeometry(0.32, 0.32, 0.4, 16);
+                    const capMat = new THREE.MeshStandardMaterial({ color: 0x9a3412, roughness: 0.4 });
+                    const cap = new THREE.Mesh(capGeo, capMat);
+                    cap.rotation.z = Math.PI / 2;
+                    cap.position.x = -0.3;
+
+                    // Spark plug wire posts
+                    for(let p = 0; p < 4; p++) {
+                        const postGeo = new THREE.CylinderGeometry(0.05, 0.05, 0.2, 8);
+                        const post = new THREE.Mesh(postGeo, capMat);
+                        const angle = (p / 4) * Math.PI * 2;
+                        post.position.set(-0.5, Math.cos(angle)*0.18, Math.sin(angle)*0.18);
+                        post.rotation.z = Math.PI / 2;
+                        group.add(post);
+                    }
+
+                    group.add(body, cap);
+                    break;
+                }
+
+                case 'waterPump': {
+                    const pumpGeo = new THREE.CylinderGeometry(0.45, 0.45, 0.3, 16);
+                    const pump = new THREE.Mesh(pumpGeo, mat);
+                    pump.rotation.x = Math.PI / 2;
+
+                    const pulleyGeo = new THREE.CylinderGeometry(0.35, 0.35, 0.2, 16);
+                    const pulley = new THREE.Mesh(pulleyGeo, mat);
+                    pulley.rotation.x = Math.PI / 2;
+                    pulley.position.z = 0.25;
+
+                    group.add(pump, pulley);
+                    break;
+                }
+
+                case 'oilFilter': {
+                    const filterGeo = new THREE.CylinderGeometry(0.28, 0.28, 0.6, 24);
+                    const filter = new THREE.Mesh(filterGeo, mat);
+                    filter.rotation.z = -Math.PI / 4;
+                    group.add(filter);
+                    break;
+                }
+
+                case 'oilPanDrainBolt': {
+                    const boltGeo = new THREE.CylinderGeometry(0.12, 0.12, 0.25, 6);
+                    const bolt = new THREE.Mesh(boltGeo, mat);
+                    group.add(bolt);
+                    break;
+                }
+
+                case 'drainBoltWasher':
+                case 'distributorORing':
+                case 'waterPumpGasket': {
+                    const ringGeo = new THREE.TorusGeometry(0.15, 0.03, 12, 24);
+                    const ring = new THREE.Mesh(ringGeo, mat);
+                    ring.rotation.x = Math.PI / 2;
+                    group.add(ring);
+                    break;
+                }
+
+                case 'rubberGrommets': {
+                    for(let g = -0.8; g <= 0.8; g += 0.53) {
+                        const grommetGeo = new THREE.CylinderGeometry(0.08, 0.08, 0.08, 12);
+                        const grommet = new THREE.Mesh(grommetGeo, mat);
+                        grommet.position.set(0, 0, g);
+                        group.add(grommet);
+                    }
+                    break;
+                }
+
+                default: {
+                    const defaultGeo = new THREE.BoxGeometry(0.5, 0.5, 0.5);
+                    const defaultMesh = new THREE.Mesh(defaultGeo, mat);
+                    group.add(defaultMesh);
+                }
+            }
+
+            // Enable Shadow Casting & Receiving for all child meshes
+            group.traverse(child => {
+                if (child.isMesh) {
+                    child.castShadow = true;
+                    child.receiveShadow = true;
+                }
+            });
+
+            return group;
+        }
+
+        // --- HTML LABELS CREATOR ---
+        function createHTMLLabel(data) {
+            const container = document.getElementById('labels-container');
+            const label = document.createElement('div');
+            label.className = 'part-label';
+            label.id = `label-${data.id}`;
+            label.innerHTML = `<i class="fa-solid fa-circle-dot text-[9px] mr-1"></i>${data.name}`;
+            
+            label.onclick = (e) => {
+                e.stopPropagation();
+                selectPart(data.id);
+            };
+
+            container.appendChild(label);
+            labelsMap.set(data.id, label);
+        }
+
+        // --- INTERACTION & EXPLODED POSITION LOGIC ---
+        function updateExplodePositions(ratio) {
+            currentExplodeRatio = ratio;
+            document.getElementById('explode-slider').value = Math.round(ratio * 100);
+            document.getElementById('slider-val').innerText = `${Math.round(ratio * 100)}%`;
+
+            partsGroup.children.forEach(mesh => {
+                const assembled = mesh.userData.assembledPos;
+                const exploded = mesh.userData.explodedPos;
+                
+                // Interpolate position based on slider percentage ratio
+                mesh.position.lerpVectors(assembled, exploded, ratio);
+            });
+        }
+
+        // --- UI & CONTROL BINDINGS ---
+        function setupUI() {
+            // Populate Left Sidebar Directory List
+            const listContainer = document.getElementById('parts-list');
+            
+            // Sort by Assembly Order
+            const sortedParts = [...ENGINE_PARTS_DATA].sort((a,b) => a.order - b.order);
+
+            sortedParts.forEach(part => {
+                const item = document.createElement('div');
+                item.className = `part-item flex items-center justify-between p-2 rounded-lg cursor-pointer border border-transparent hover:border-blue-500/40 hover:bg-gray-800/60 transition text-xs`;
+                item.dataset.id = part.id;
+                item.innerHTML = `
+                    <div class="flex items-center space-x-2 truncate">
+                        <span class="w-2 h-2 rounded-full" style="background-color: #${part.color.toString(16).padStart(6, '0')}"></span>
+                        <span class="truncate font-medium text-gray-300">${part.name}</span>
+                    </div>
+                    <span class="text-[10px] font-mono text-gray-500">#${part.order}</span>
+                `;
+                item.onclick = () => selectPart(part.id);
+                listContainer.appendChild(item);
+            });
+
+            // Slider Input
+            const slider = document.getElementById('explode-slider');
+            slider.oninput = (e) => {
+                if (isAutoAnimating) stopAutoAnimate();
+                const ratio = parseFloat(e.target.value) / 100;
+                updateExplodePositions(ratio);
+            };
+
+            // Play / Pause Auto Animation
+            document.getElementById('btn-play-pause').onclick = toggleAutoAnimate;
+
+            // View Presets
+            document.getElementById('btn-preset-iso').onclick = () => setCameraPreset(12, 10, 14, 0, 0.8, 0);
+            document.getElementById('btn-preset-front').onclick = () => setCameraPreset(0, 2, 18, 0, 0.8, 0);
+            document.getElementById('btn-preset-top').onclick = () => setCameraPreset(0, 18, 0.1, 0, 0.8, 0);
+            document.getElementById('btn-preset-side').onclick = () => setCameraPreset(18, 2, 0, 0, 0.8, 0);
+            document.getElementById('btn-reset-view').onclick = () => {
+                setCameraPreset(12, 10, 14, 0, 0.8, 0);
+                selectPart(null);
+            };
+
+            // Labels Toggle Button
+            document.getElementById('btn-toggle-labels').onclick = () => {
+                labelsVisible = !labelsVisible;
+                const container = document.getElementById('labels-container');
+                container.style.display = labelsVisible ? 'block' : 'none';
+                document.getElementById('btn-toggle-labels').classList.toggle('bg-blue-600/30', labelsVisible);
+                document.getElementById('btn-toggle-labels').classList.toggle('bg-gray-800', !labelsVisible);
+            };
+
+            if (!labelsVisible) {
+                document.getElementById('labels-container').style.display = 'none';
+                document.getElementById('btn-toggle-labels').classList.remove('bg-blue-600/30');
+                document.getElementById('btn-toggle-labels').classList.add('bg-gray-800');
+            }
+
+            // Close Inspector Card
+            document.getElementById('btn-close-card').onclick = () => selectPart(null);
+
+            // Isolate / Focus Camera on Selected Part
+            document.getElementById('btn-isolate-part').onclick = () => {
+                if (!selectedPartId) return;
+                const mesh = partsMap.get(selectedPartId);
+                if (mesh) {
+                    const worldPos = new THREE.Vector3();
+                    mesh.getWorldPosition(worldPos);
+                    
+                    gsap.to(controls.target, {
+                        x: worldPos.x,
+                        y: worldPos.y,
+                        z: worldPos.z,
+                        duration: 1,
+                        ease: 'power2.out'
+                    });
+                    
+                    gsap.to(camera.position, {
+                        x: worldPos.x + 3,
+                        y: worldPos.y + 2,
+                        z: worldPos.z + 4,
+                        duration: 1,
+                        ease: 'power2.out'
+                    });
+                }
+            };
+
+            // Step Navigation Buttons
+            document.getElementById('btn-step-prev').onclick = () => navigateStep(-1);
+            document.getElementById('btn-step-next').onclick = () => navigateStep(1);
+
+            // Toggle Stage Theme (White Stage / Dark Stage)
+            const btnToggleStage = document.getElementById('btn-toggle-stage');
+            if (btnToggleStage) {
+                btnToggleStage.onclick = () => {
+                    setStageTheme(stageMode === 'white' ? 'dark' : 'white');
+                };
+            }
+
+            // Fullscreen Toggle
+            const btnFs = document.getElementById('btn-fullscreen');
+            if (btnFs) {
+                btnFs.onclick = () => {
+                    if (!document.fullscreenElement) {
+                        document.documentElement.requestFullscreen().catch(() => {});
+                    } else {
+                        document.exitFullscreen().catch(() => {});
+                    }
+                };
+                document.addEventListener('fullscreenchange', () => {
+                    const icon = document.getElementById('fs-icon');
+                    if (icon) icon.className = document.fullscreenElement ? 'fa-solid fa-compress' : 'fa-solid fa-expand';
+                });
+            }
+        }
+
+        // --- STAGE THEME CONTROLLER ---
+        function setStageTheme(mode) {
+            stageMode = mode;
+            const isWhite = (mode === 'white');
+
+            if (isWhite) {
+                scene.background.set(0xffffff);
+                if (scene.fog) scene.fog.color.set(0xffffff);
+                document.body.style.backgroundColor = '#ffffff';
+                const container = document.getElementById('canvas-container');
+                if (container) container.style.backgroundColor = '#ffffff';
+
+                if (stagePlatform) stagePlatform.material.color.set(0xf8fafc);
+                if (stageRing) stageRing.material.color.set(0xcbd5e1);
+                if (floorMesh) floorMesh.material.opacity = 0.16;
+
+                if (gridHelper) scene.remove(gridHelper);
+                gridHelper = new THREE.GridHelper(30, 30, 0x94a3b8, 0xe2e8f0);
+                gridHelper.position.y = -5.19;
+                scene.add(gridHelper);
+
+                const stageIcon = document.getElementById('stage-icon');
+                const stageLabel = document.getElementById('stage-label');
+                if (stageIcon) stageIcon.className = 'fa-solid fa-sun text-amber-400';
+                if (stageLabel) stageLabel.innerText = 'White Stage';
+            } else {
+                scene.background.set(0x0d1117);
+                if (scene.fog) scene.fog.color.set(0x0d1117);
+                document.body.style.backgroundColor = '#0d1117';
+                const container = document.getElementById('canvas-container');
+                if (container) container.style.backgroundColor = '#0d1117';
+
+                if (stagePlatform) stagePlatform.material.color.set(0x161b22);
+                if (stageRing) stageRing.material.color.set(0x30363d);
+                if (floorMesh) floorMesh.material.opacity = 0.35;
+
+                if (gridHelper) scene.remove(gridHelper);
+                gridHelper = new THREE.GridHelper(30, 30, 0x388bfd, 0x21262d);
+                gridHelper.position.y = -5.19;
+                scene.add(gridHelper);
+
+                const stageIcon = document.getElementById('stage-icon');
+                const stageLabel = document.getElementById('stage-label');
+                if (stageIcon) stageIcon.className = 'fa-solid fa-moon text-blue-400';
+                if (stageLabel) stageLabel.innerText = 'Dark Stage';
+            }
+        }
+
+        // --- STEP NAVIGATION ---
+        function navigateStep(direction) {
+            const sortedParts = [...ENGINE_PARTS_DATA].sort((a,b) => a.order - b.order);
+            let currentIndex = sortedParts.findIndex(p => p.id === selectedPartId);
+            
+            let nextIndex = currentIndex + direction;
+            if (currentIndex === -1) nextIndex = direction > 0 ? 0 : sortedParts.length - 1;
+
+            if (nextIndex >= 0 && nextIndex < sortedParts.length) {
+                selectPart(sortedParts[nextIndex].id);
+            }
+        }
+
+        // --- PART SELECTION & HIGHLIGHTING ---
+        function selectPart(partId) {
+            // Reset previous highlights
+            partsMap.forEach((mesh, id) => {
+                mesh.traverse(child => {
+                    if (child.isMesh && child.userData.originalColor) {
+                        child.material.color.setHex(child.userData.originalColor);
+                        child.material.emissive.setHex(0x000000);
+                    }
+                });
+
+                const label = labelsMap.get(id);
+                if (label) label.classList.remove('active');
+            });
+
+            document.querySelectorAll('.part-item').forEach(el => {
+                el.classList.remove('bg-blue-600/20', 'border-blue-500/50');
+            });
+
+            selectedPartId = partId;
+            const infoCard = document.getElementById('info-card');
+
+            if (!partId) {
+                // Hide Card
+                infoCard.classList.add('translate-x-full', 'opacity-0');
+                shiftViewForSheet(false);
+                return;
+            }
+
+            // Highlight newly selected mesh
+            const selectedMesh = partsMap.get(partId);
+            const partData = ENGINE_PARTS_DATA.find(p => p.id === partId);
+
+            if (selectedMesh && partData) {
+                selectedMesh.traverse(child => {
+                    if (child.isMesh) {
+                        if (!child.userData.originalColor) {
+                            child.userData.originalColor = child.material.color.getHex();
+                        }
+                        child.material.emissive.setHex(0x3b82f6);
+                        child.material.emissiveIntensity = 0.3;
+                    }
+                });
+
+                // Highlight active 3D Label
+                const label = labelsMap.get(partId);
+                if (label) label.classList.add('active');
+
+                // Highlight sidebar list item
+                const listItem = document.querySelector(`.part-item[data-id="${partId}"]`);
+                if (listItem) {
+                    listItem.classList.add('bg-blue-600/20', 'border-blue-500/50');
+                    listItem.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }
+
+                // Update Detail Inspector Card
+                document.getElementById('card-part-step').innerText = `STEP ${String(partData.order).padStart(2, '0')}`;
+                document.getElementById('card-part-title').innerText = partData.name;
+                document.getElementById('card-part-desc').innerText = partData.desc;
+                document.getElementById('card-part-mat').innerText = partData.material;
+                document.getElementById('card-part-order').innerText = `Order #${partData.order} of ${ENGINE_PARTS_DATA.length}`;
+
+                // Show Card
+                infoCard.classList.remove('translate-x-full', 'opacity-0');
+                shiftViewForSheet(true);
+            }
+        }
+
+        // On a phone the detail card is a sheet over the lower half, so lift the picture to keep the chosen part in sight.
+        function shiftViewForSheet(open) {
+            if (open && window.innerWidth < 768) {
+                const w = window.innerWidth, h = window.innerHeight;
+                camera.setViewOffset(w, h, 0, Math.round(h * 0.2), w, h);
+            } else {
+                camera.clearViewOffset();
+            }
+        }
+
+        // --- AUTO ANIMATION LOOP ---
+        function toggleAutoAnimate() {
+            if (isAutoAnimating) {
+                stopAutoAnimate();
+            } else {
+                startAutoAnimate();
+            }
+        }
+
+        function startAutoAnimate() {
+            isAutoAnimating = true;
+            document.getElementById('play-icon').className = 'fa-solid fa-pause';
+            document.getElementById('play-text').innerText = 'Pause Animate';
+
+            const obj = { ratio: currentExplodeRatio };
+            const targetRatio = currentExplodeRatio > 0.5 ? 0 : 1;
+            const duration = Math.abs(currentExplodeRatio - targetRatio) * 6;
+
+            animationTween = gsap.to(obj, {
+                ratio: targetRatio,
+                duration: duration,
+                ease: 'power1.inOut',
+                onUpdate: () => {
+                    updateExplodePositions(obj.ratio);
+                },
+                onComplete: () => {
+                    // Loop continuously back and forth
+                    currentExplodeRatio = targetRatio;
+                    startAutoAnimate();
+                }
+            });
+        }
+
+        function stopAutoAnimate() {
+            isAutoAnimating = false;
+            if (animationTween) animationTween.kill();
+            document.getElementById('play-icon').className = 'fa-solid fa-play';
+            document.getElementById('play-text').innerText = 'Auto Animate';
+        }
+
+        // --- CAMERA PRESET ANIMATIONS ---
+        function setCameraPreset(cx, cy, cz, tx, ty, tz) {
+            gsap.to(camera.position, {
+                x: cx,
+                y: cy,
+                z: cz,
+                duration: 1.2,
+                ease: 'power2.inOut'
+            });
+
+            gsap.to(controls.target, {
+                x: tx,
+                y: ty,
+                z: tz,
+                duration: 1.2,
+                ease: 'power2.inOut'
+            });
+        }
+
+        // --- MOUSE & RAYCASTING EVENT HANDLING ---
+        function setupEvents() {
+            window.addEventListener('resize', onWindowResize);
+
+            const container = document.getElementById('canvas-container');
+            
+            let pointerDownPos = { x: 0, y: 0 };
+            
+            container.addEventListener('pointerdown', (e) => {
+                pointerDownPos = { x: e.clientX, y: e.clientY };
+            });
+
+            container.addEventListener('pointerup', (e) => {
+                // Prevent trigger if dragging camera view
+                const dist = Math.hypot(e.clientX - pointerDownPos.x, e.clientY - pointerDownPos.y);
+                if (dist > 5) return;
+
+                mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+                mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+
+                raycaster.setFromCamera(mouse, camera);
+                const intersects = raycaster.intersectObjects(partsGroup.children, true);
+
+                if (intersects.length > 0) {
+                    // Find top level group part
+                    let topObj = intersects[0].object;
+                    while (topObj.parent && topObj.parent !== partsGroup) {
+                        topObj = topObj.parent;
+                    }
+                    if (topObj.userData && topObj.userData.id) {
+                        selectPart(topObj.userData.id);
+                    }
+                }
+            });
+        }
+
+        // In portrait the view is narrow, so widen the vertical field of view to keep the whole engine in frame.
+        function fitFov() {
+            const aspect = window.innerWidth / window.innerHeight;
+            camera.fov = aspect >= 1 ? 45 : Math.min(68, 45 + (1 - aspect) * 45);
+        }
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            fitFov();
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        // --- ANIMATION LOOP & 3D LABELS PROJECTION ---
+        function animate() {
+            requestAnimationFrame(animate);
+
+            controls.update();
+
+            // Project 3D Part Positions to 2D Screen Space for HTML Labels
+            if (labelsVisible) {
+                const tempV = new THREE.Vector3();
+                partsMap.forEach((mesh, id) => {
+                    const label = labelsMap.get(id);
+                    if (label) {
+                        mesh.getWorldPosition(tempV);
+                        
+                        // Vector screen projection
+                        tempV.project(camera);
+
+                        // Check if behind camera frustum
+                        if (tempV.z > 1) {
+                            label.style.opacity = '0';
+                            return;
+                        }
+
+                        const x = (tempV.x * 0.5 + 0.5) * window.innerWidth;
+                        const y = (-tempV.y * 0.5 + 0.5) * window.innerHeight;
+
+                        label.style.left = `${x}px`;
+                        label.style.top = `${y}px`;
+                        label.style.opacity = '1';
+                    }
+                });
+            }
+
+            renderer.render(scene, camera);
+        }
+    </script>
+</body>
+</html>

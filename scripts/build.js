@@ -103,7 +103,7 @@ function buildServiceWorker() {
     walk(path.join(ROOT, d), d, files);
   });
   files = files.filter(function (f) { return !/package\.json$/.test(f); });
-  files.push('index.html', 'manifest.webmanifest');
+  files.push('index.html', 'manifest.webmanifest', 'engine.html');
   files.sort();
 
   var hash = crypto.createHash('sha256');
