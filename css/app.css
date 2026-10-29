@@ -475,6 +475,8 @@ tr:last-child td { border-bottom: 0; }
 .dg .wave.y { stroke: var(--yellow-ink); }
 .dg .wave.g { stroke: var(--green-ink); }
 .dg .zero { stroke: var(--ink-3); stroke-width: 1; stroke-dasharray: 3 4; fill: none; }
+.dg .fan-spin { transform-box: fill-box; transform-origin: center; animation: fan-spin 0.3s linear infinite; }
+@keyframes fan-spin { to { transform: rotate(360deg); } }
 
 /* ---------- Misc ---------- */
 .loading { padding: 3rem 0; text-align: center; color: var(--ink-2); }

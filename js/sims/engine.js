@@ -111,7 +111,7 @@ export function build() {
     raf = window.requestAnimationFrame(frame);
   }
 
-  function manual() { running = false; angle = ctl.angle.get(); draw(); }
+  function manual() { running = false; play.textContent = 'Play'; angle = ctl.angle.get(); draw(); }
   ctl.speed = slider('Playback speed', 1, 100, 1, 12, '%', function () { running = true; }, 0);
   ctl.angle = slider('Crank angle (drag to step)', 0, 719, 1, 0, 'deg', manual, 0);
   ctl.adv = slider('Spark advance', 0, 40, 1, 12, 'deg BTDC', draw, 0);

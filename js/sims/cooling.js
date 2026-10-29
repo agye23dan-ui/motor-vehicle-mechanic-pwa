@@ -8,6 +8,7 @@ import { slider, select, readout, paint, r, clamp } from './kit.js';
 
 var C_HEAT = 150;           // kJ per degree for engine plus coolant
 var K0 = 0.54;              // kW per degree of radiator, fully open, good airflow
+var FAN_ON = 100, FAN_OFF = 94;     // the fan switch closes above 100 °C and opens again below 94 °C
 var FAULTS = {
   none: 'Healthy system',
   stuckclosed: 'Thermostat stuck closed',
@@ -32,7 +33,7 @@ export function build() {
     var f = ctl.fault.get(), amb = ctl.amb.get(), load = ctl.load.get() / 100, speed = ctl.speed.get();
     var qin = 12 + 55 * load;
     var open = f === 'stuckclosed' ? 0 : f === 'stuckopen' ? 1 : clamp((T - 86) / 12, 0, 1);
-    if (f !== 'fan') { if (T > 100) fanOn = true; if (T < 94) fanOn = false; } else fanOn = false;
+    if (f !== 'fan') { if (T > FAN_ON) fanOn = true; if (T < FAN_OFF) fanOn = false; } else fanOn = false;
     var air = 0.3 + speed / 100 * 0.8 + (fanOn ? 0.9 : 0);
     var rad = f === 'blocked' ? 0.4 : 1;
     var flow = f === 'belt' ? 0.55 : 1;
@@ -44,7 +45,7 @@ export function build() {
     if (T > boilPoint) { boiled = true; T = boilPoint + (T - boilPoint) * 0.2; }
     time += dt;
     hist.push(T); if (hist.length > 160) hist.shift();
-    return { qin: qin, qout: qout, open: open, air: air, boilPoint: boilPoint };
+    return { qin: qin, qout: qout, open: open, air: air, boilPoint: boilPoint, fanFailed: f === 'fan' && T > FAN_ON };
   }
 
   function draw(s) {
@@ -66,9 +67,14 @@ export function build() {
     g += '<rect x="108" y="76" width="24" height="28" rx="3" class="box ' + (s.open > 0.5 ? 'tint-c' : 'tint-m') + '"/><text x="176" y="62" class="tsm">' + (s.open > 0.95 ? 'Thermostat open' : s.open > 0.05 ? 'Thermostat opening' : 'Thermostat closed') + '</text>';
     // bypass
     g += '<path d="M170 135H140V190H170" fill="none" stroke="' + hot + '" stroke-width="5" stroke-dasharray="4 4" opacity="' + (1 - s.open * 0.8).toFixed(2) + '"/>';
-    // fan
-    g += '<g transform="translate(53 140)"><circle r="14" class="box ' + (fanOn ? 'tint-c' : '') + '"/><path d="M0 0L9 -6M0 0L-9 -6M0 0L0 10" class="k"/></g>';
-    g += '<text x="53" y="280" class="tsm" text-anchor="middle">' + (fanOn ? 'Fan on' : 'Fan off') + '</text>';
+    // fan: four blades that turn while it runs. The picture is redrawn often, so the turn is given a
+    // delay from the clock to keep its phase and stop it restarting on every redraw.
+    var blades = '';
+    for (var b = 0; b < 4; b++) blades += '<ellipse cx="0" cy="-9" rx="4" ry="8" transform="rotate(' + (b * 90) + ')" class="box ' + (fanOn ? 'tint-c' : '') + '"/>';
+    g += '<g transform="translate(53 140)"><circle r="19" class="box ' + (s.fanFailed ? 'tint-m' : '') + '"/>' +
+      '<g class="' + (fanOn ? 'fan-spin' : '') + '"' + (fanOn ? ' style="animation-delay:-' + ((performance.now() / 1000) % 0.3).toFixed(3) + 's"' : '') + '><circle r="17" fill="none"/>' + blades + '</g>' +
+      '<circle r="3" class="head"/>' + (fanOn ? '<circle r="22" class="flow"/>' : '') + '</g>';
+    g += '<text x="53" y="290" class="tsm" text-anchor="middle">' + (s.fanFailed ? 'Fan failed' : fanOn ? 'Fan running' : 'Fan off') + '</text>';
     // graph
     var gx = 320, gy = 40, gw = 220, gh = 190;
     g += '<rect x="' + gx + '" y="' + gy + '" width="' + gw + '" height="' + gh + '" rx="4" class="box"/>';
@@ -87,6 +93,7 @@ export function build() {
       ['Heat from the engine', r(s.qin, 0) + ' kW'],
       ['Heat taken by the radiator', r(s.qout, 0) + ' kW'],
       ['Thermostat', s.open > 0.95 ? 'fully open' : s.open > 0.05 ? 'partly open' : 'closed'],
+      ['Radiator fan', s.fanFailed ? 'not running, although the coolant is above ' + FAN_ON + ' °C' : fanOn ? 'running (switched on above ' + FAN_ON + ' °C, off below ' + FAN_OFF + ' °C)' : ctl.fault.get() === 'fan' ? 'not running (failed), not needed yet' : 'off: the coolant is below ' + FAN_ON + ' °C, so it is not needed', s.fanFailed ? 'odd' : ''],
       ['Airflow through the radiator', r(s.air * 100, 0) + '% of normal'],
       ['Boiling point of the coolant here', r(s.boilPoint, 0) + ' °C']
     ]);

@@ -60,7 +60,9 @@ export function build() {
       ['Fault', f.name],
       ['Low side', r(low, 0) + ' psi (' + r(low * 0.0689, 1) + ' bar), normal about ' + r(nl, 0)],
       ['High side', r(high, 0) + ' psi (' + r(high * 0.0689, 1) + ' bar), normal about ' + r(nh, 0)],
-      ['Air at the vent', r(vent, 0) + ' °C']
+      ['Air at the vent', r(vent, 0) + ' °C'],
+      ['Compressor clutch', ctl.fault.get() === 'lowcharge' ? 'engaged, but cutting in and out quickly (the low-side switch keeps tripping)' : ctl.fault.get() === 'none' ? 'engaged, cycling off now and then to hold the evaporator temperature' : 'engaged'],
+      ['Condenser fan', ctl.fault.get() === 'fan' ? 'not turning, or the airflow is blocked' : 'running (it runs whenever the A/C is on)', ctl.fault.get() === 'fan' ? 'odd' : '']
     ]);
     advice.replaceChildren(h('div', { class: 'label' }, 'What this pattern shows'), h('p', null, f.advice), h('p', null, h('strong', null, 'Next step: '), f.check));
   }
