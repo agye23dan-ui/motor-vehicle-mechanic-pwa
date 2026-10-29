@@ -94,10 +94,19 @@ DIAGRAMS['spark-plug-conditions'] = {
     var s = t(20, 24, 'Plug tip and electrode', 'tb');
     items.forEach(function (it, i) {
       var x = 20 + i * 96, cx = x + 40;
-      s += R(cx - 14, 40, 28, 40, 'metal', 3) + R(cx - 11, 80, 22, 26, 'metal-dark', 0) + R(cx - 9, 106, 18, 26, 'box ' + it[2], 2);
-      s += P('M' + (cx + 9) + ' 132V146H' + (cx - (it[3] === 4 ? 2 : 3)) + 'V138', 'k');
-      if (it[3] === 1 || it[3] === 2) s += R(cx - 9, 118, 18, 14, it[3] === 1 ? 'tint-k-soft' : 'tint-c', 2);
-      if (it[3] === 3) s += '<circle cx="' + cx + '" cy="122" r="4" class="tint-m"/><circle cx="' + (cx + 3) + '" cy="128" r="2.5" class="tint-m"/>';
+      var cond = it[3];
+      var ins = ['#efe3c0', '#2a2c2e', '#17181a', '#f6f1ee', '#cfc3a0'][cond];       /* colour of the insulator nose */
+      s += '<rect x="' + (cx - 12) + '" y="36" width="24" height="46" rx="4" style="fill:#f1f0ea;stroke:#9aa2aa;stroke-width:1.2"/><path d="M' + (cx - 8) + ' 42V76" style="stroke:#fff;stroke-width:3;opacity:0.7"/>' +
+        '<path d="M' + (cx - 17) + ' 82H' + (cx + 17) + 'L' + (cx + 14) + ' 92H' + (cx - 14) + 'Z" style="fill:url(#shMetal);stroke:#59626b;stroke-width:1.2"/>' +
+        '<rect x="' + (cx - 12) + '" y="92" width="24" height="26" style="fill:url(#shMetal);stroke:#59626b;stroke-width:1.2"/>';
+      for (var th = 0; th < 5; th++) s += '<path d="M' + (cx - 12) + ' ' + (96 + th * 5) + 'H' + (cx + 12) + '" style="stroke:#4a5158;stroke-width:1.3"/>';
+      s += '<rect x="' + (cx - 7) + '" y="118" width="14" height="22" rx="3" style="fill:' + ins + ';stroke:#59626b;stroke-width:1"/>';
+      s += '<rect x="' + (cx - 2) + '" y="136" width="4" height="9" rx="1" style="fill:' + (cond === 4 ? '#8d96a0' : '#cfd4da') + ';stroke:#3b4148;stroke-width:0.8"/>';
+      /* ground electrode: an L-shaped strap, worn plugs have it rounded and a wider gap */
+      s += '<path d="M' + (cx + 10) + ' 118V' + (cond === 4 ? 154 : 148) + 'H' + (cx + (cond === 4 ? 1 : 0)) + '" style="fill:none;stroke:#1d2024;stroke-width:5;stroke-linecap:round;stroke-linejoin:round"/><path d="M' + (cx + 10) + ' 118V' + (cond === 4 ? 154 : 148) + 'H' + (cx + (cond === 4 ? 1 : 0)) + '" style="fill:none;stroke:#aeb5bc;stroke-width:3;stroke-linecap:round;stroke-linejoin:round"/>';
+      if (cond === 1) s += '<path d="M' + (cx - 8) + ' 124Q' + cx + ' 134 ' + (cx + 8) + ' 124L' + (cx + 9) + ' 143L' + (cx - 9) + ' 143Z" style="fill:#0d0e0f;fill-opacity:0.85"/>';
+      if (cond === 2) s += '<path d="M' + (cx - 10) + ' 120H' + (cx + 10) + 'V142H' + (cx - 10) + 'Z" style="fill:#0b0c0d;fill-opacity:0.8"/><path d="M' + (cx - 8) + ' 134Q' + cx + ' 142 ' + (cx + 8) + ' 134" style="fill:none;stroke:#59626b;stroke-width:1.4;opacity:0.7"/>';
+      if (cond === 3) s += '<circle cx="' + (cx - 3) + '" cy="126" r="3" style="fill:#b8a898"/><circle cx="' + (cx + 3) + '" cy="132" r="2.5" style="fill:#c9bfb4"/><circle cx="' + (cx - 2) + '" cy="138" r="2" style="fill:#d6cdc4"/>';
       s += labelLines(cx, 176, it[0], 13, 'tsm') + labelLines(cx, 208, it[1], 14, 'ts');
     });
     return wrap(500, 310, 'Spark plug conditions', 'Five spark plug tips showing normal, carbon fouled, oil fouled, overheated and worn conditions with the likely cause.', s);
@@ -112,12 +121,15 @@ DIAGRAMS['belt-wear'] = {
     var s = t(20, 24, 'Belt underside (the ribbed face)', 'tb');
     items.forEach(function (it, i) {
       var x = 20 + i * 96;
-      s += R(x, 40, 80, 90, 'box', 4);
-      for (var k = 0; k < 6; k++) s += R(x + 8 + k * 11, 48, 7, 74, i === 0 ? 'tint-c' : 'tint-y', 1);
-      if (i === 1) for (var c = 0; c < 5; c++) s += P('M' + (x + 8) + ' ' + (62 + c * 14) + 'l62 4', 'k');
-      if (i === 2) s += R(x + 6, 46, 68, 78, 'tint-k-soft', 2);
-      if (i === 3) s += P('M' + (x + 4) + ' 48l-6 -6M' + (x + 4) + ' 70l-8 -3M' + (x + 4) + ' 94l-7 4', 'k');
-      if (i === 4) s += R(x + 30, 70, 22, 30, 'box', 0);
+      s += '<rect x="' + x + '" y="40" width="80" height="90" rx="5" style="fill:#14161a;stroke:#050607;stroke-width:1.4"/>';
+      for (var k = 0; k < 6; k++) {
+        var rx = x + 8 + k * 11;
+        s += '<rect x="' + rx + '" y="46" width="7" height="78" rx="3" style="fill:' + (i === 2 ? '#4a4338' : '#2b2f35') + ';stroke:#0a0b0d;stroke-width:0.8"/><rect x="' + (rx + 1.5) + '" y="48" width="1.8" height="74" rx="1" style="fill:#fff;fill-opacity:' + (i === 2 ? '0.55' : '0.16') + '"/>';
+      }
+      if (i === 1) for (var c = 0; c < 5; c++) s += '<path d="M' + (x + 8) + ' ' + (62 + c * 14) + 'l64 ' + (c % 2 ? -3 : 4) + '" style="stroke:#c9bfb4;stroke-width:1.6;opacity:0.85"/>';
+      if (i === 2) s += '<rect x="' + (x + 6) + '" y="44" width="68" height="82" rx="4" style="fill:#fff;fill-opacity:0.18"/>';
+      if (i === 3) s += '<path d="M' + (x + 3) + ' 48l-7 -6M' + (x + 3) + ' 60l-9 -2M' + (x + 3) + ' 74l-8 3M' + (x + 3) + ' 90l-9 -1M' + (x + 3) + ' 106l-7 5" style="stroke:#8a8f95;stroke-width:1.6;stroke-linecap:round"/>';
+      if (i === 4) s += '<rect x="' + (x + 30) + '" y="68" width="24" height="34" rx="2" style="fill:#e9eef0;fill-opacity:0.95;stroke:#59626b"/><path d="M' + (x + 30) + ' 68l8 6M' + (x + 54) + ' 68l-6 8" style="stroke:#7a828a;stroke-width:1.2"/>';
       s += labelLines(x + 40, 152, it[0], 13, 'tsm') + labelLines(x + 40, 184, it[1], 14, 'ts');
     });
     var c = callout(20, 236, 460, ['Also check: noise (a squeal means slip), tension and alignment, and the tensioner and pulleys. Never run an engine with a cracked belt: a snapped belt loses charging, cooling and steering at once.']);
