@@ -154,6 +154,8 @@
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
     <!-- GSAP for Smooth Camera & Component Animations -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <!-- The engine model itself: realistic cast, pressed and moulded parts built from shapes -->
+    <script src="js/engine-model.js"></script>
 </head>
 <body class="w-full h-screen overflow-hidden">
 
@@ -604,8 +606,9 @@
             renderer.shadowMap.enabled = true;
             renderer.shadowMap.type = THREE.PCFSoftShadowMap;
             renderer.toneMapping = THREE.ACESFilmicToneMapping;
-            renderer.toneMappingExposure = 1.08;
+            renderer.toneMappingExposure = 1.0;
             container.appendChild(renderer.domElement);
+            EngineModel.environment(renderer, scene);   // a bright studio for the metal to reflect
 
             // OrbitControls Setup
             controls = new THREE.OrbitControls(camera, renderer.domElement);
@@ -616,7 +619,7 @@
             controls.target.set(0, 0.8, 0);
 
             // Studio Lighting for White Stage
-            const ambientLight = new THREE.AmbientLight(0xffffff, 0.95);
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.3);
             scene.add(ambientLight);
 
             const dirLight1 = new THREE.DirectionalLight(0xffffff, 1.4);
@@ -634,11 +637,11 @@
             dirLight1.shadow.radius = 2.5;
             scene.add(dirLight1);
 
-            const dirLight2 = new THREE.DirectionalLight(0x60a5fa, 0.6);
+            const dirLight2 = new THREE.DirectionalLight(0xbcd4ff, 0.35);
             dirLight2.position.set(-15, 12, -10);
             scene.add(dirLight2);
 
-            const fillLight = new THREE.DirectionalLight(0xfef08a, 0.35);
+            const fillLight = new THREE.DirectionalLight(0xfff3d6, 0.2);
             fillLight.position.set(0, -5, 10);
             scene.add(fillLight);
 
@@ -699,284 +702,18 @@
             });
         }
 
-        // Calculate assembled state location
+        // Assembled and exploded positions come from the model, so the parts always line up.
         function getAssembledPosition(data) {
-            // Tight stack coordinates
-            const yMap = {
-                oilPanDrainBolt: -1.8,
-                drainBoltWasher: -1.72,
-                oilPan: -1.3,
-                oilPanGasket: -0.75,
-                engineBlock: 0,
-                oilFilter: [1.1, -0.2, 0.5],
-                timingBeltDrivePulley: [0, -0.3, 1.45],
-                waterPumpGasket: [1.1, 0, 1.35],
-                waterPump: [1.1, 0, 1.5],
-                headGasket: 0.78,
-                cylinderHead: 1.35,
-                camshaftPulley: [0, 1.5, 1.45],
-                distributorORing: [-1.42, 1.5, 0],
-                distributor: [-1.8, 1.5, 0],
-                exhaustManifoldGasket: [-0.95, 1.3, 0.5],
-                exhaustManifold: [-1.4, 1.2, 0.5],
-                intakeManifoldGasket: [0.95, 1.4, -0.5],
-                intakeManifold: [1.4, 1.4, -0.5],
-                cylinderHeadCoverGasket: 1.95,
-                rubberGrommets: 2.38,
-                cylinderHeadCover: 2.2
-            };
-
-            const val = yMap[data.id];
-            if (Array.isArray(val)) {
-                return new THREE.Vector3(val[0], val[1], val[2]);
-            }
-            return new THREE.Vector3(0, val !== undefined ? val : 0, 0);
+            return new THREE.Vector3(...EngineModel.assembled[data.id]);
         }
 
         function getExplodedPosition(data) {
-            const assembled = getAssembledPosition(data);
-            const vec = new THREE.Vector3(...data.vector);
-            return assembled.clone().add(vec.multiplyScalar(1.2));
+            return getAssembledPosition(data).add(new THREE.Vector3(...EngineModel.explode[data.id]).multiplyScalar(1.2));
         }
 
-        // Procedural Mesh Generator for specific engine parts
+        // Each part is built in js/engine-model.js (cast, pressed and moulded shapes, merged into a few meshes).
         function createPartMesh(data) {
-            const group = new THREE.Group();
-            const mat = new THREE.MeshStandardMaterial({
-                color: data.color,
-                metalness: data.metalness,
-                roughness: data.roughness,
-                envMapIntensity: 1.0
-            });
-
-            switch(data.id) {
-                case 'engineBlock': {
-                    // Main cast cylinder block
-                    const blockGeo = new THREE.BoxGeometry(2.4, 1.4, 2.6);
-                    const blockMesh = new THREE.Mesh(blockGeo, mat);
-                    group.add(blockMesh);
-
-                    // 4 Cylinder Bores
-                    const boreMat = new THREE.MeshStandardMaterial({ color: 0x111111, metalness: 0.9, roughness: 0.1 });
-                    for(let i = -0.9; i <= 0.9; i += 0.6) {
-                        const boreGeo = new THREE.CylinderGeometry(0.24, 0.24, 1.42, 24);
-                        const bore = new THREE.Mesh(boreGeo, boreMat);
-                        bore.position.set(0, 0, i);
-                        group.add(bore);
-                    }
-                    // Side cooling ribs
-                    const ribGeo = new THREE.BoxGeometry(2.5, 0.05, 2.4);
-                    for(let r = -0.4; r <= 0.4; r += 0.2) {
-                        const rib = new THREE.Mesh(ribGeo, mat);
-                        rib.position.y = r;
-                        group.add(rib);
-                    }
-                    break;
-                }
-
-                case 'cylinderHead': {
-                    const headGeo = new THREE.BoxGeometry(2.3, 0.8, 2.5);
-                    const headMesh = new THREE.Mesh(headGeo, mat);
-                    group.add(headMesh);
-
-                    // Dual Camshaft Channels top grooves
-                    const grooveGeo = new THREE.CylinderGeometry(0.18, 0.18, 2.4, 16);
-                    const g1 = new THREE.Mesh(grooveGeo, mat);
-                    g1.rotation.x = Math.PI / 2;
-                    g1.position.set(-0.5, 0.35, 0);
-                    const g2 = g1.clone();
-                    g2.position.set(0.5, 0.35, 0);
-                    group.add(g1, g2);
-                    break;
-                }
-
-                case 'cylinderHeadCover': {
-                    // Sculpted valve cover
-                    const coverGeo = new THREE.CylinderGeometry(1.1, 1.15, 2.5, 12, 1, false, 0, Math.PI);
-                    const coverMesh = new THREE.Mesh(coverGeo, mat);
-                    coverMesh.rotation.z = Math.PI / 2;
-                    coverMesh.rotation.y = Math.PI / 2;
-                    coverMesh.scale.set(0.8, 1, 0.5);
-                    group.add(coverMesh);
-
-                    // Oil Cap on top
-                    const capGeo = new THREE.CylinderGeometry(0.2, 0.2, 0.1, 16);
-                    const cap = new THREE.Mesh(capGeo, new THREE.MeshStandardMaterial({ color: 0xdd2222, roughness: 0.3 }));
-                    cap.position.set(-0.5, 0.35, 0.6);
-                    group.add(cap);
-                    break;
-                }
-
-                case 'oilPan': {
-                    const panShape = new THREE.BoxGeometry(2.2, 0.7, 2.5);
-                    const pan = new THREE.Mesh(panShape, mat);
-                    pan.scale.set(1, 0.8, 1);
-                    // Sump taper bottom
-                    const sumpGeo = new THREE.BoxGeometry(1.6, 0.4, 1.2);
-                    const sump = new THREE.Mesh(sumpGeo, mat);
-                    sump.position.set(0, -0.4, -0.4);
-                    group.add(pan, sump);
-                    break;
-                }
-
-                case 'headGasket':
-                case 'oilPanGasket':
-                case 'cylinderHeadCoverGasket':
-                case 'exhaustManifoldGasket':
-                case 'intakeManifoldGasket': {
-                    // Detailed cut-out gaskets
-                    let w = 2.3, h = 2.5;
-                    if (data.id.includes('exhaust')) { w = 0.2; h = 2.2; }
-                    if (data.id.includes('intake')) { w = 0.2; h = 2.2; }
-                    const gGeo = new THREE.BoxGeometry(w, 0.04, h);
-                    const gMesh = new THREE.Mesh(gGeo, mat);
-                    group.add(gMesh);
-                    break;
-                }
-
-                case 'camshaftPulley':
-                case 'timingBeltDrivePulley': {
-                    const radius = data.id.includes('cam') ? 0.55 : 0.38;
-                    const gearGeo = new THREE.CylinderGeometry(radius, radius, 0.18, 32);
-                    const gear = new THREE.Mesh(gearGeo, mat);
-                    gear.rotation.x = Math.PI / 2;
-
-                    // Center nut
-                    const nutGeo = new THREE.CylinderGeometry(0.12, 0.12, 0.22, 6);
-                    const nut = new THREE.Mesh(nutGeo, new THREE.MeshStandardMaterial({ color: 0x94a3b8, metalness: 0.9 }));
-                    nut.rotation.x = Math.PI / 2;
-                    group.add(gear, nut);
-                    break;
-                }
-
-                case 'exhaustManifold': {
-                    // Curved 4-into-1 exhaust runners
-                    for (let i = -0.85; i <= 0.85; i += 0.55) {
-                        const curve = new THREE.CatmullRomCurve3([
-                            new THREE.Vector3(0, 0, i),
-                            new THREE.Vector3(-0.6, -0.2, i * 0.7),
-                            new THREE.Vector3(-1.0, -0.8, 0)
-                        ]);
-                        const tubeGeo = new THREE.TubeGeometry(curve, 16, 0.1, 12, false);
-                        const tube = new THREE.Mesh(tubeGeo, mat);
-                        group.add(tube);
-                    }
-                    // Collector pipe flange
-                    const flangeGeo = new THREE.CylinderGeometry(0.25, 0.25, 0.3, 16);
-                    const flange = new THREE.Mesh(flangeGeo, mat);
-                    flange.position.set(-1.0, -0.95, 0);
-                    group.add(flange);
-                    break;
-                }
-
-                case 'intakeManifold': {
-                    // Curved intake runners & plenum box
-                    const plenumGeo = new THREE.BoxGeometry(0.7, 0.6, 2.2);
-                    const plenum = new THREE.Mesh(plenumGeo, mat);
-                    plenum.position.set(0.6, 0.1, 0);
-                    group.add(plenum);
-
-                    for (let i = -0.85; i <= 0.85; i += 0.55) {
-                        const tubeGeo = new THREE.CylinderGeometry(0.09, 0.09, 0.7, 12);
-                        const tube = new THREE.Mesh(tubeGeo, mat);
-                        tube.rotation.z = Math.PI / 3;
-                        tube.position.set(0.2, 0, i);
-                        group.add(tube);
-                    }
-                    break;
-                }
-
-                case 'distributor': {
-                    // Ignition distributor body & cap
-                    const bodyGeo = new THREE.CylinderGeometry(0.3, 0.25, 0.6, 16);
-                    const body = new THREE.Mesh(bodyGeo, mat);
-                    body.rotation.z = Math.PI / 2;
-                    
-                    const capGeo = new THREE.CylinderGeometry(0.32, 0.32, 0.4, 16);
-                    const capMat = new THREE.MeshStandardMaterial({ color: 0x9a3412, roughness: 0.4 });
-                    const cap = new THREE.Mesh(capGeo, capMat);
-                    cap.rotation.z = Math.PI / 2;
-                    cap.position.x = -0.3;
-
-                    // Spark plug wire posts
-                    for(let p = 0; p < 4; p++) {
-                        const postGeo = new THREE.CylinderGeometry(0.05, 0.05, 0.2, 8);
-                        const post = new THREE.Mesh(postGeo, capMat);
-                        const angle = (p / 4) * Math.PI * 2;
-                        post.position.set(-0.5, Math.cos(angle)*0.18, Math.sin(angle)*0.18);
-                        post.rotation.z = Math.PI / 2;
-                        group.add(post);
-                    }
-
-                    group.add(body, cap);
-                    break;
-                }
-
-                case 'waterPump': {
-                    const pumpGeo = new THREE.CylinderGeometry(0.45, 0.45, 0.3, 16);
-                    const pump = new THREE.Mesh(pumpGeo, mat);
-                    pump.rotation.x = Math.PI / 2;
-
-                    const pulleyGeo = new THREE.CylinderGeometry(0.35, 0.35, 0.2, 16);
-                    const pulley = new THREE.Mesh(pulleyGeo, mat);
-                    pulley.rotation.x = Math.PI / 2;
-                    pulley.position.z = 0.25;
-
-                    group.add(pump, pulley);
-                    break;
-                }
-
-                case 'oilFilter': {
-                    const filterGeo = new THREE.CylinderGeometry(0.28, 0.28, 0.6, 24);
-                    const filter = new THREE.Mesh(filterGeo, mat);
-                    filter.rotation.z = -Math.PI / 4;
-                    group.add(filter);
-                    break;
-                }
-
-                case 'oilPanDrainBolt': {
-                    const boltGeo = new THREE.CylinderGeometry(0.12, 0.12, 0.25, 6);
-                    const bolt = new THREE.Mesh(boltGeo, mat);
-                    group.add(bolt);
-                    break;
-                }
-
-                case 'drainBoltWasher':
-                case 'distributorORing':
-                case 'waterPumpGasket': {
-                    const ringGeo = new THREE.TorusGeometry(0.15, 0.03, 12, 24);
-                    const ring = new THREE.Mesh(ringGeo, mat);
-                    ring.rotation.x = Math.PI / 2;
-                    group.add(ring);
-                    break;
-                }
-
-                case 'rubberGrommets': {
-                    for(let g = -0.8; g <= 0.8; g += 0.53) {
-                        const grommetGeo = new THREE.CylinderGeometry(0.08, 0.08, 0.08, 12);
-                        const grommet = new THREE.Mesh(grommetGeo, mat);
-                        grommet.position.set(0, 0, g);
-                        group.add(grommet);
-                    }
-                    break;
-                }
-
-                default: {
-                    const defaultGeo = new THREE.BoxGeometry(0.5, 0.5, 0.5);
-                    const defaultMesh = new THREE.Mesh(defaultGeo, mat);
-                    group.add(defaultMesh);
-                }
-            }
-
-            // Enable Shadow Casting & Receiving for all child meshes
-            group.traverse(child => {
-                if (child.isMesh) {
-                    child.castShadow = true;
-                    child.receiveShadow = true;
-                }
-            });
-
-            return group;
+            return EngineModel.build(data.id);
         }
 
         // --- HTML LABELS CREATOR ---
@@ -1025,7 +762,7 @@
                 item.dataset.id = part.id;
                 item.innerHTML = `
                     <div class="flex items-center space-x-2 truncate">
-                        <span class="w-2 h-2 rounded-full" style="background-color: #${part.color.toString(16).padStart(6, '0')}"></span>
+                        <span class="w-2 h-2 rounded-full" style="background-color: #${(EngineModel.dot[part.id] || part.color).toString(16).padStart(6, '0')}"></span>
                         <span class="truncate font-medium text-gray-300">${part.name}</span>
                     </div>
                     <span class="text-[10px] font-mono text-gray-500">#${part.order}</span>
