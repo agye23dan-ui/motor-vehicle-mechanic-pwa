@@ -85,7 +85,7 @@ export function build() {
     var d = '';
     hist.forEach(function (v, k) { d += (k ? 'L' : 'M') + (gx + gw * k / 160).toFixed(1) + ' ' + (gy + gh - clamp((v - 20) / 120, 0, 1) * gh).toFixed(1); });
     g += '<path d="' + d + '" fill="none" stroke="var(--magenta-ink)" stroke-width="2.4"/>';
-    g += '<text x="' + (gx + gw / 2) + '" y="' + (gy + gh + 22) + '" class="tb" text-anchor="middle">Coolant temperature (last minutes)</text>';
+    g += '<text x="' + (gx + gw / 2) + '" y="' + (gy + gh + 22) + '" class="tb" text-anchor="middle">Coolant temperature</text>';
     g += '</svg>';
     paint(holder, g);
     out.set([
