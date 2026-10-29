@@ -138,6 +138,7 @@
             background: #79c0ff;
         }
 
+        @keyframes spin { to { transform: rotate(360deg); } }
         .pulse-glow {
             animation: pulseGlow 2s infinite;
         }
@@ -158,6 +159,12 @@
 
     <!-- Canvas Container for Three.js Render -->
     <div id="canvas-container"></div>
+
+    <!-- Shown until the first frame is drawn. The first visit downloads the 3D libraries, which can take a while on mobile data. -->
+    <div id="loading-note" style="position:absolute;inset:0;z-index:30;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;background:#fff;color:#1f2937;font:600 15px Inter,sans-serif;text-align:center;padding:24px">
+        <div id="loading-spin" style="width:34px;height:34px;border:4px solid #cbd5e1;border-top-color:#2563eb;border-radius:50%;animation:spin .9s linear infinite"></div>
+        <div id="loading-text">Loading the 3D engine…<br><span style="font-weight:400;font-size:13px;color:#64748b">The first visit downloads the 3D libraries, so it can take a little while. After that it opens quickly.</span></div>
+    </div>
 
     <!-- 3D HTML Labels Overlay -->
     <div id="labels-container"></div>
@@ -550,6 +557,14 @@
         let isAutoAnimating = false;
         let animationTween = null;
         let selectedPartId = null;
+        let loadingNote = document.getElementById('loading-note');
+        // If the libraries never arrived (no connection on the first visit), say so instead of leaving a blank page.
+        window.addEventListener('load', () => {
+            if (typeof THREE === 'undefined' || typeof THREE.OrbitControls === 'undefined') {
+                document.getElementById('loading-spin').style.display = 'none';
+                document.getElementById('loading-text').innerHTML = 'The 3D libraries could not be downloaded.<br><span style="font-weight:400;font-size:13px;color:#64748b">Connect to the internet and open this page once. It then works offline.</span>';
+            }
+        });
         let labelsVisible = window.innerWidth >= 640;   // part tags crowd a phone screen, so they start hidden there
         let stageMode = 'white'; // White stage by default
         let floorMesh = null;
@@ -1363,6 +1378,7 @@
         // --- ANIMATION LOOP & 3D LABELS PROJECTION ---
         function animate() {
             requestAnimationFrame(animate);
+            if (loadingNote) { loadingNote.remove(); loadingNote = null; }
 
             controls.update();
 
