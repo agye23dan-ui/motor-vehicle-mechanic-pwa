@@ -88,7 +88,7 @@ function build(kind, onExit) {
   PARTS.forEach(function (p) { st.installed[p.id] = strip; });
 
   var gparts = PARTS.slice().reverse().map(function (p) { return '<g class="veh-part" data-id="' + p.id + '" tabindex="0" role="button" aria-label="' + p.name + '" style="touch-action:none"><title>' + p.name + '</title>' + p.svg + '</g>'; }).join('');
-  var svgEl = svgFromString('<svg xmlns="http://www.w3.org/2000/svg" class="dg veh-svg" viewBox="0 0 940 520" role="group" aria-label="Car frame and workbench"><title>Car frame and workbench</title>' +
+  var svgEl = svgFromString('<svg xmlns="http://www.w3.org/2000/svg" class="dg veh-svg" viewBox="0 0 940 520" role="group" aria-label="Car frame and workbench"><title>Car frame and workbench</title><defs><linearGradient id="shMetal" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f1f4f6"/><stop offset="0.45" stop-color="#bcc3ca"/><stop offset="1" stop-color="#7c858e"/></linearGradient><linearGradient id="shRed" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#e5584a"/><stop offset="1" stop-color="#9c231a"/></linearGradient><linearGradient id="shDark" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7a828a"/><stop offset="0.5" stop-color="#4a5159"/><stop offset="1" stop-color="#2a2e33"/></linearGradient></defs>' +
     '<defs><marker id="ar" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M1 1.5 9 5 1 8.5z" class="head"/></marker></defs>' +
     '<rect x="14" y="432" width="912" height="80" rx="6" class="tint-y-soft"/><text x="916" y="448" class="tsm" text-anchor="end">Workbench: drop removed parts here</text>' +
     frame() + '<g class="veh-ghosts"></g>' + gparts + '</svg>');

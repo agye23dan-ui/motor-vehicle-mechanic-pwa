@@ -52,8 +52,8 @@ function buildSvg(asm) {
   var parts = asm.parts.slice().reverse().map(function (p) {
     return '<g class="asm-part" data-id="' + p.id + '" tabindex="0" role="button" aria-label="' + p.name + '"><title>' + p.name + '</title>' + p.svg + '</g>';
   }).join('');
-  return '<svg xmlns="http://www.w3.org/2000/svg" class="dg asm-svg" viewBox="0 0 640 480" role="group" aria-label="' + asm.title + '"><title>' + asm.title + '</title>' +
-    '<rect x="14" y="390" width="612" height="84" rx="6" class="tint-y-soft"/><text x="614" y="406" class="tsm" text-anchor="end">Workbench</text>' +
+  return '<svg xmlns="http://www.w3.org/2000/svg" class="dg asm-svg" viewBox="0 0 640 480" role="group" aria-label="' + asm.title + '"><title>' + asm.title + '</title><defs><linearGradient id="shMetal" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f1f4f6"/><stop offset="0.45" stop-color="#bcc3ca"/><stop offset="1" stop-color="#7c858e"/></linearGradient><linearGradient id="shRed" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#e5584a"/><stop offset="1" stop-color="#9c231a"/></linearGradient><linearGradient id="shDark" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7a828a"/><stop offset="0.5" stop-color="#4a5159"/><stop offset="1" stop-color="#2a2e33"/></linearGradient></defs>' +
+    '<rect x="14" y="390" width="612" height="14" rx="3" style="fill:#c79a5f;stroke:#7a5a30;stroke-width:1.2"/><rect x="22" y="404" width="596" height="70" style="fill:#8f6b3d;stroke:#5c4222;stroke-width:1.2"/><path d="M30 414H610M30 430H610M30 446H610M30 462H610" stroke="#5c4222" stroke-opacity="0.35" stroke-width="1"/><path d="M60 398H220M300 396H470M500 398H600" stroke="#7a5a30" stroke-opacity="0.45" stroke-width="1"/><text x="614" y="386" class="tsm" text-anchor="end" style="font-size:10px">Workbench</text>' +
     asm.statics + parts + (asm.overlay ? '<g pointer-events="none">' + asm.overlay + '</g>' : '') + '</svg>';
 }
 

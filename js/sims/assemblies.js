@@ -10,17 +10,24 @@ export function C(x, y, r, c) { return '<circle cx="' + x + '" cy="' + y + '" r=
 export function P(d, c, st) { return '<path d="' + d + '" class="' + (c || 'k') + '"' + (st ? ' style="' + st + '"' : '') + '/>'; }
 export function T(x, y, s, cls, a) { return '<text x="' + x + '" y="' + y + '" class="' + (cls || 'tsm') + '"' + (a ? ' text-anchor="' + a + '"' : '') + '>' + s + '</text>'; }
 
+/* A rectangle with its own paint, for parts that need real colours (rubber, friction lining, red caliper paint). */
+export function RS(x, y, w, h, st, rx) { return '<rect x="' + x + '" y="' + y + '" width="' + w + '" height="' + h + '" rx="' + (rx || 0) + '" style="' + st + '"/>'; }
+var STEEL = 'fill:url(#shMetal);stroke:#59626b;stroke-width:1.2', DARK = 'fill:url(#shDark);stroke:#1f2327;stroke-width:1.2', RED = 'fill:url(#shRed);stroke:#5a1510;stroke-width:1.4', RUBBER = 'fill:#1d2024;stroke:#0a0b0d;stroke-width:1.4', LINING = 'fill:#3b3834;stroke:#14110f;stroke-width:1.2';
+
 /* Shared side view of a front wheel end: wheel, caliper and pads at the top, carrier at the bottom, disc on the hub. */
 export var WHEELEND = {
-  wheel: R(240, 56, 50, 288, 'box tint-c', 8) + R(230, 118, 10, 24, 'metal-dark') + R(230, 258, 10, 24, 'metal-dark') + T(265, 205, 'Wheel', 'tsm', 'middle'),
-  caliper: R(306, 62, 14, 92, 'metal-dark') + R(306, 54, 152, 14, 'metal-dark') + R(400, 54, 58, 100, 'metal-dark') + R(396, 86, 12, 44, 'tint-m') + T(430, 112, 'Caliper', 'tsm', 'middle'),
-  pads: R(322, 80, 8, 64, 'metal-dark') + R(330, 80, 20, 64, 'tint-y') + R(376, 80, 20, 64, 'tint-y') + R(396, 80, 8, 64, 'metal-dark') +
-    R(322, 258, 8, 64, 'metal-dark') + R(330, 258, 20, 64, 'tint-y') + R(376, 258, 20, 64, 'tint-y') + R(396, 258, 8, 64, 'metal-dark'),
-  carrier: R(312, 328, 168, 12, 'metal-dark') + R(312, 262, 8, 70, 'metal-dark') + R(404, 262, 8, 70, 'metal-dark') + R(466, 324, 22, 20, 'metal-dark') + T(396, 358, 'Carrier', 'tsm', 'middle'),
-  disc: R(350, 70, 26, 84, 'metal') + R(350, 246, 26, 84, 'metal') + R(376, 150, 64, 100, 'metal') + P('M356 74V150M366 74V150M356 250V326M366 250V326', 'k2') + T(408, 205, 'Disc', 'tsm', 'middle'),
-  discscrew: R(368, 176, 8, 16, 'metal-dark'),
-  knuckle: R(480, 36, 110, 328, 'metal', 6) + T(535, 205, 'Knuckle', 'tsm', 'middle'),
-  flange: R(440, 150, 40, 100, 'metal-dark')
+  wheel: RS(240, 56, 50, 288, RUBBER, 9) + P('M246 64V336', 'k2', 'stroke:#3a4048;stroke-width:9;stroke-dasharray:7 6') + RS(254, 80, 36, 240, STEEL, 4) + RS(274, 150, 16, 100, STEEL, 3) +
+    P('M262 96V304', 'k2', 'stroke:#7c858e;stroke-width:1') + RS(230, 118, 10, 24, DARK, 2) + RS(230, 258, 10, 24, DARK, 2) + P('M232 124H238M232 130H238M232 136H238M232 264H238M232 270H238M232 276H238', 'k2', 'stroke:#8d96a0;stroke-width:1') + T(265, 205, 'Wheel', 'tsm', 'middle'),
+  caliper: RS(306, 62, 14, 92, RED, 3) + RS(306, 54, 152, 14, RED, 3) + RS(400, 54, 58, 100, RED, 5) + RS(396, 86, 12, 44, STEEL, 2) + P('M398 92V124', 'k2', 'stroke:#2a2f35;stroke-width:1.4') +
+    RS(436, 42, 8, 12, DARK, 2) + RS(438, 38, 4, 5, STEEL, 1) + RS(342, 46, 8, 10, DARK, 1) + RS(446, 130, 18, 8, STEEL, 2) + T(430, 112, 'Caliper', 'tsm', 'middle'),
+  pads: RS(322, 80, 8, 64, STEEL, 1) + RS(330, 80, 20, 64, LINING, 2) + RS(376, 80, 20, 64, LINING, 2) + RS(396, 80, 8, 64, STEEL, 1) + P('M340 84V140M386 84V140', 'k2', 'stroke:#6b645d;stroke-width:1.5') +
+    RS(322, 258, 8, 64, STEEL, 1) + RS(330, 258, 20, 64, LINING, 2) + RS(376, 258, 20, 64, LINING, 2) + RS(396, 258, 8, 64, STEEL, 1) + P('M340 262V318M386 262V318', 'k2', 'stroke:#6b645d;stroke-width:1.5'),
+  carrier: RS(312, 328, 168, 12, DARK, 3) + RS(312, 262, 8, 70, DARK, 2) + RS(404, 262, 8, 70, DARK, 2) + RS(466, 324, 22, 20, DARK, 3) + C(477, 334, 4, 'metal') + T(396, 358, 'Carrier', 'tsm', 'middle'),
+  disc: RS(350, 70, 26, 84, STEEL, 2) + RS(350, 246, 26, 84, STEEL, 2) + RS(376, 150, 64, 100, STEEL, 4) + P('M356 74V150M366 74V150M356 250V326M366 250V326', 'k2', 'stroke:#4a5158;stroke-width:1.6') +
+    RS(352, 96, 22, 4, DARK, 1) + RS(352, 112, 22, 4, DARK, 1) + RS(352, 128, 22, 4, DARK, 1) + RS(352, 268, 22, 4, DARK, 1) + RS(352, 284, 22, 4, DARK, 1) + RS(352, 300, 22, 4, DARK, 1) + T(408, 205, 'Disc', 'tsm', 'middle'),
+  discscrew: RS(366, 176, 10, 16, DARK, 2) + P('M368 184H374M371 180V188', 'k2', 'stroke:#cfd4da;stroke-width:1'),
+  knuckle: RS(480, 36, 110, 328, DARK, 10) + C(535, 80, 18, 'metal') + C(535, 80, 7, 'metal-dark') + RS(494, 300, 16, 40, STEEL, 3) + P('M500 300V280', 'k2', 'stroke:#2a2f35;stroke-width:3') + T(535, 205, 'Knuckle', 'tsm', 'middle'),
+  flange: RS(440, 150, 40, 100, DARK, 3) + RS(432, 160, 8, 12, STEEL, 1) + RS(432, 228, 8, 12, STEEL, 1)
 };
 
 /* Path of a belt wrapped round circles [x, y, r], listed clockwise on the screen, using outer tangent lines. */

@@ -66,6 +66,12 @@
 
 /* Disassemble and assemble studio */
 .asm-svg { max-height: 36rem; }
+.asm-svg .asm-part, .veh-svg .veh-part { filter: drop-shadow(1.5px 2.5px 2px rgba(20, 24, 28, 0.38)); }
+/* Real-looking metal: lit from the top left, in light cast metal and dark steel */
+.asm-svg.dg .metal, .veh-svg.dg .metal { fill: url(#shMetal); fill-opacity: 1; stroke: #59626b; stroke-width: 1.2; }
+.asm-svg.dg .metal-dark, .veh-svg.dg .metal-dark { fill: url(#shDark); fill-opacity: 1; stroke: #1f2327; stroke-width: 1.2; }
+.asm-svg.dg .box, .veh-svg.dg .box { stroke-width: 1.4; }
+
 .asm-part { cursor: pointer; transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s; transform-box: fill-box; transform-origin: center; outline: none; }
 .asm-part:hover, .asm-part:focus-visible { filter: brightness(1.12) drop-shadow(0 0 3px var(--cyan)); }
 .asm-part.active { filter: drop-shadow(0 0 4px var(--magenta)); }
