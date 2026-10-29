@@ -23,6 +23,8 @@ function lift(a, open, close) {
   return Math.sin(Math.PI * pos / span);
 }
 
+function polarPt(cx, cy, rad, deg) { var a = deg * Math.PI / 180; return [cx + rad * Math.sin(a), cy - rad * Math.cos(a)]; }
+
 function pistonY(a) {          // distance of the piston pin below the crank centre
   var t = a * Math.PI / 180;
   return CRANK * Math.cos(t) + Math.sqrt(ROD * ROD - CRANK * CRANK * Math.sin(t) * Math.sin(t));
@@ -52,25 +54,69 @@ export function build() {
     var burn = angle >= 360 && angle < 540;
     var sparkNow = Math.abs(angle - tm.spark) < 6 || Math.abs(angle - tm.spark - 720) < 6;
     var gas = angle < 180 ? '#4aa3df' : angle < 360 ? '#e8c53a' : angle < 540 ? '#d8442b' : '#8a8a8a';
-    var s = '<svg xmlns="http://www.w3.org/2000/svg" class="dg" viewBox="0 30 560 392" role="img" aria-label="Four-stroke engine at ' + Math.round(angle % 720) + ' degrees: ' + st[0] + ' stroke"><title>Four-stroke engine</title><desc>A piston moving in a cylinder with intake and exhaust valves, and a timing circle.</desc>';
-    // cylinder
-    s += '<rect x="' + (cx - BORE / 2 - 8) + '" y="' + (top - 6) + '" width="' + (BORE + 16) + '" height="' + (pistonTop + 60 - top + 150) + '" rx="4" class="metal" style="fill-opacity:0.12"/>';
-    s += '<rect x="' + (cx - BORE / 2) + '" y="' + top + '" width="' + BORE + '" height="' + Math.max(0, pistonTop - top) + '" style="fill:' + gas + ';fill-opacity:0.45"/>';
-    s += '<path d="M' + (cx - BORE / 2) + ' ' + top + 'V' + (crankY - 60) + 'M' + (cx + BORE / 2) + ' ' + top + 'V' + (crankY - 60) + '" class="k"/>';
-    // head and valves
-    s += '<rect x="' + (cx - BORE / 2 - 8) + '" y="' + (top - 30) + '" width="' + (BORE + 16) + '" height="26" rx="3" class="metal-dark"/>';
-    s += '<rect x="' + (cx - 26) + '" y="' + (top - 4 + li * 12 - 6) + '" width="20" height="6" class="tint-c"/><path d="M' + (cx - 16) + ' ' + (top - 30) + 'V' + (top - 4 + li * 12 - 6) + '" class="k bold"/>';
-    s += '<rect x="' + (cx + 6) + '" y="' + (top - 4 + le * 12 - 6) + '" width="20" height="6" class="tint-m"/><path d="M' + (cx + 16) + ' ' + (top - 30) + 'V' + (top - 4 + le * 12 - 6) + '" class="k bold"/>';
-    s += '<text x="' + (cx - 34) + '" y="' + (top - 36) + '" class="tsm" text-anchor="middle">Intake</text><text x="' + (cx + 38) + '" y="' + (top - 36) + '" class="tsm" text-anchor="middle">Exhaust</text>';
-    // spark plug
-    s += '<path d="M' + cx + ' ' + (top - 30) + 'V' + (top - 52) + '" class="k bold"/>' + (sparkNow ? '<path d="M' + (cx - 6) + ' ' + (top + 6) + 'L' + cx + ' ' + (top - 2) + 'L' + (cx + 6) + ' ' + (top + 8) + '" class="k bold" style="stroke:var(--yellow-ink)"/>' : '');
-    // piston, rod, crank
-    s += '<rect x="' + (cx - BORE / 2 + 2) + '" y="' + pistonTop + '" width="' + (BORE - 4) + '" height="40" rx="3" class="metal-dark"/>';
+    var s = '<svg xmlns="http://www.w3.org/2000/svg" class="dg" viewBox="0 8 560 414" role="img" aria-label="Four-stroke engine at ' + Math.round(angle % 720) + ' degrees: ' + st[0] + ' stroke"><title>Four-stroke engine</title><desc>A piston moving in a cylinder with intake and exhaust valves, and a timing circle.</desc>';
+    // ---- cutaway of one cylinder: block, water jacket, head, valves, cams, piston, rod and crank ----
+    var bx0 = cx - BORE / 2, bx1 = cx + BORE / 2, camY = top - 124, seat = top - 6;
+    var iX = cx - 24, eX = cx + 24;
     var t = angle * Math.PI / 180, kx = cx + CRANK * Math.sin(t), ky = crankY - CRANK * Math.cos(t);
-    s += '<circle cx="' + cx + '" cy="' + crankY + '" r="' + (CRANK + 14) + '" class="metal" style="fill-opacity:0.15"/>';
-    s += '<path d="M' + cx + ' ' + py + 'L' + kx.toFixed(1) + ' ' + ky.toFixed(1) + '" class="k bold"/><path d="M' + cx + ' ' + crankY + 'L' + kx.toFixed(1) + ' ' + ky.toFixed(1) + '" class="k bold"/>';
-    s += '<circle cx="' + cx + '" cy="' + crankY + '" r="8" class="metal-dark"/><circle cx="' + kx.toFixed(1) + '" cy="' + ky.toFixed(1) + '" r="6" class="box"/>';
-    s += '<text x="' + cx + '" y="414" class="tb" text-anchor="middle">' + st[0] + ' stroke</text>';
+    var rodDx = kx - cx, rodDy = ky - py, rodLen = Math.hypot(rodDx, rodDy) || 1, nx = -rodDy / rodLen, ny = rodDx / rodLen;
+    var flame = burn ? 0.15 + 0.8 * Math.max(0, 1 - (angle % 720 - 360) / 150) : (angle >= tm.spark && angle < 360 ? 0.3 : 0);
+    function camMid(open, close) { var o = ((open % 720) + 720) % 720, c = ((close % 720) + 720) % 720, span = (c - o + 720) % 720; return o + span / 2; }
+    function cam(x, mid) {
+      var rot = ((angle - mid) / 2) % 360;
+      return '<g transform="translate(' + x + ' ' + camY + ') rotate(' + rot.toFixed(1) + ')"><ellipse cx="0" cy="5" rx="10" ry="14" fill="url(#enMetal)" stroke="#3b4148"/><circle r="4" fill="#2a2f35"/></g>';
+    }
+    s += '<defs>' +
+      '<linearGradient id="enIron" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#3a3f45"/><stop offset="0.5" stop-color="#6c737b"/><stop offset="1" stop-color="#3a3f45"/></linearGradient>' +
+      '<linearGradient id="enHead" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#cfd5db"/><stop offset="1" stop-color="#8e969e"/></linearGradient>' +
+      '<linearGradient id="enMetal" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#e6eaee"/><stop offset="1" stop-color="#8b949d"/></linearGradient>' +
+      '<linearGradient id="enPiston" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#8e969e"/><stop offset="0.45" stop-color="#e3e7eb"/><stop offset="1" stop-color="#7d858d"/></linearGradient>' +
+      '<radialGradient id="enFlame" cx="0.5" cy="0.35" r="0.65"><stop offset="0" stop-color="#fff6c4"/><stop offset="0.35" stop-color="#ffb12a"/><stop offset="1" stop-color="#d8442b" stop-opacity="0"/></radialGradient>' +
+      '</defs>';
+    // block with its water jackets and the oil pan
+    s += '<rect x="' + (bx0 - 30) + '" y="' + (top - 8) + '" width="' + (BORE + 60) + '" height="' + (crankY - 52 - top + 8) + '" fill="url(#enIron)" stroke="#1d2024"/>';
+    [bx0 - 22, bx1 + 8].forEach(function (x) { s += '<rect x="' + x + '" y="' + (top + 4) + '" width="14" height="' + (crankY - 70 - top) + '" rx="3" fill="#7fc4e8" fill-opacity="0.55" stroke="#4a8fb3" stroke-width="0.8"/>'; });
+    s += '<path d="M' + (cx - 100) + ' ' + (crankY + 34) + 'Q' + (cx - 100) + ' ' + (crankY + 64) + ' ' + (cx - 60) + ' ' + (crankY + 64) + 'H' + (cx + 60) + 'Q' + (cx + 100) + ' ' + (crankY + 64) + ' ' + (cx + 100) + ' ' + (crankY + 34) + 'Z" fill="#2c3036" stroke="#101214"/>' +
+      '<path d="M' + (cx - 94) + ' ' + (crankY + 54) + 'Q' + (cx - 47) + ' ' + (crankY + 48) + ' ' + cx + ' ' + (crankY + 54) + 'T' + (cx + 94) + ' ' + (crankY + 54) + 'V' + (crankY + 62) + 'H' + (cx - 94) + 'Z" fill="#c9a23c" fill-opacity="0.8"/>';
+    s += '<rect x="' + (bx0 - 30) + '" y="' + (crankY - 60) + '" width="' + (BORE + 60) + '" height="28" fill="#2c3036" stroke="#101214"/>';
+    // combustion chamber and the gas in it
+    s += '<path d="M' + bx0 + ' ' + (top + 2) + 'V' + (top - 6) + 'Q' + cx + ' ' + (top - 22) + ' ' + bx1 + ' ' + (top - 6) + 'V' + (top + 2) + 'V' + pistonTop.toFixed(1) + 'H' + bx0 + 'Z" fill="' + gas + '" fill-opacity="0.5"/>';
+    if (flame > 0) s += '<ellipse cx="' + cx + '" cy="' + (top + Math.max(10, (pistonTop - top) * 0.45)).toFixed(1) + '" rx="' + (BORE / 2 + 4) + '" ry="' + Math.max(16, (pistonTop - top) * 0.6).toFixed(1) + '" fill="url(#enFlame)" opacity="' + flame.toFixed(2) + '"/>';
+    s += '<path d="M' + bx0 + ' ' + top + 'V' + (crankY - 60) + 'M' + bx1 + ' ' + top + 'V' + (crankY - 60) + '" stroke="#e6eaee" stroke-width="2" opacity="0.55"/>';
+    // cylinder head, ports and gas flow
+    s += '<rect x="' + (bx0 - 30) + '" y="' + (top - 74) + '" width="' + (BORE + 60) + '" height="66" rx="4" fill="url(#enHead)" stroke="#59626b"/>';
+    s += '<path d="M' + (bx0 - 30) + ' ' + (top - 46) + 'Q' + (iX - 24) + ' ' + (top - 46) + ' ' + iX + ' ' + (top - 10) + '" fill="none" stroke="' + (li > 0.02 ? '#4aa3df' : '#6d747c') + '" stroke-width="15" stroke-linecap="round" opacity="0.85"/>';
+    s += '<path d="M' + eX + ' ' + (top - 10) + 'Q' + (eX + 24) + ' ' + (top - 46) + ' ' + (bx1 + 30) + ' ' + (top - 46) + '" fill="none" stroke="' + (le > 0.02 ? '#b5543f' : '#6d747c') + '" stroke-width="15" stroke-linecap="round" opacity="0.85"/>';
+    if (li > 0.02) s += '<path d="M' + (bx0 - 22) + ' ' + (top - 54) + 'l12 8l-12 8M' + (bx0 - 2) + ' ' + (top - 52) + 'l12 8l-12 8" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>';
+    if (le > 0.02) s += '<path d="M' + (bx1 + 4) + ' ' + (top - 54) + 'l12 8l-12 8M' + (bx1 + 22) + ' ' + (top - 54) + 'l12 8l-12 8" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>';
+    // valves with their springs, and the camshafts that open them
+    [[iX, li, 'Intake'], [eX, le, 'Exhaust']].forEach(function (v) {
+      var x = v[0], lift = v[1] * 12, head = seat + lift;
+      s += '<path d="M' + x + ' ' + (top - 74) + 'V' + head.toFixed(1) + '" stroke="#cfd4da" stroke-width="5" stroke-linecap="round"/>';
+      s += '<path d="M' + (x - 13) + ' ' + head.toFixed(1) + 'L' + (x + 13) + ' ' + head.toFixed(1) + 'L' + (x + 5) + ' ' + (head - 8).toFixed(1) + 'H' + (x - 5) + 'Z" fill="#8d96a0" stroke="#3b4148"/>';
+      var y0 = top - 74, y1 = top - 100 + lift, n = 7, sp = 'M' + (x - 9) + ' ' + y0;
+      for (var q = 1; q <= n; q++) sp += 'L' + (x + (q % 2 ? 9 : -9)) + ' ' + (y0 + (y1 - y0) * q / n).toFixed(1);
+      s += '<path d="' + sp + '" fill="none" stroke="#7a828b" stroke-width="2.4"/><rect x="' + (x - 11) + '" y="' + (y1 - 6).toFixed(1) + '" width="22" height="6" rx="2" fill="#4a5058"/>';
+    });
+    s += cam(iX, camMid(tm.iOpen, tm.iClose)) + cam(eX, camMid(tm.eOpen, tm.eClose));
+    s += '<text x="' + (iX - 26) + '" y="' + (camY - 22) + '" class="tsm" text-anchor="middle" style="font-size:10px">Intake cam</text><text x="' + (eX + 26) + '" y="' + (camY - 22) + '" class="tsm" text-anchor="middle" style="font-size:10px">Exhaust cam</text>';
+    // spark plug
+    s += '<rect x="' + (cx - 5) + '" y="' + (top - 112) + '" width="10" height="40" rx="2" fill="#f1f0ea" stroke="#9aa2aa"/><path d="M' + (cx - 8) + ' ' + (top - 72) + 'h16l-2 -8h-12z" fill="#aab2ba" stroke="#59626b"/><rect x="' + (cx - 3) + '" y="' + (top - 74) + '" width="6" height="68" fill="#8d96a0"/><path d="M' + cx + ' ' + (top - 8) + 'v6h7" fill="none" stroke="#cfd4da" stroke-width="2.5"/>';
+    if (sparkNow) s += '<path d="M' + (cx + 7) + ' ' + (top - 2) + 'l-5 7l7 3l-6 8" fill="none" stroke="#ffe44d" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>';
+    // piston, rings, wrist pin, connecting rod and crank
+    s += '<rect x="' + (bx0 + 2) + '" y="' + pistonTop.toFixed(1) + '" width="' + (BORE - 4) + '" height="42" rx="3" fill="url(#enPiston)" stroke="#3b4148"/>';
+    [5, 11, 17].forEach(function (d) { s += '<path d="M' + (bx0 + 2) + ' ' + (pistonTop + d).toFixed(1) + 'H' + (bx1 - 2) + '" stroke="#2a2f35" stroke-width="2"/>'; });
+    s += '<path d="M' + (kx.toFixed(1)) + ' ' + ky.toFixed(1) + 'L' + (cx + nx * 11).toFixed(1) + ' ' + (py + ny * 11).toFixed(1) + 'L' + (cx - nx * 11).toFixed(1) + ' ' + (py - ny * 11).toFixed(1) + 'Z" fill="none"/>' +
+      '<path d="M' + (kx + nx * 12).toFixed(1) + ' ' + (ky + ny * 12).toFixed(1) + 'L' + (cx + nx * 6).toFixed(1) + ' ' + (py + ny * 6).toFixed(1) + 'L' + (cx - nx * 6).toFixed(1) + ' ' + (py - ny * 6).toFixed(1) + 'L' + (kx - nx * 12).toFixed(1) + ' ' + (ky - ny * 12).toFixed(1) + 'Z" fill="#aeb5bc" stroke="#3b4148"/>';
+    s += '<circle cx="' + cx + '" cy="' + py.toFixed(1) + '" r="8" fill="#4a5058" stroke="#1d2024"/>';
+    var cwA = angle + 180;
+    var cw0 = polarPt(cx, crankY, 46, cwA - 55), cw1 = polarPt(cx, crankY, 46, cwA + 55);
+    s += '<circle cx="' + cx + '" cy="' + crankY + '" r="' + (CRANK + 16) + '" fill="#101214" fill-opacity="0.18"/>';
+    s += '<path d="M' + cx + ' ' + crankY + 'L' + cw0[0].toFixed(1) + ' ' + cw0[1].toFixed(1) + 'A46 46 0 0 1 ' + cw1[0].toFixed(1) + ' ' + cw1[1].toFixed(1) + 'Z" fill="#4a5058" stroke="#1d2024"/>';
+    s += '<path d="M' + cx + ' ' + crankY + 'L' + kx.toFixed(1) + ' ' + ky.toFixed(1) + '" stroke="#6b737c" stroke-width="12" stroke-linecap="round"/>';
+    s += '<circle cx="' + kx.toFixed(1) + '" cy="' + ky.toFixed(1) + '" r="12" fill="#aeb5bc" stroke="#3b4148"/><circle cx="' + kx.toFixed(1) + '" cy="' + ky.toFixed(1) + '" r="6" fill="#4a5058"/>';
+    s += '<circle cx="' + cx + '" cy="' + crankY + '" r="14" fill="url(#enMetal)" stroke="#3b4148"/><circle cx="' + cx + '" cy="' + crankY + '" r="5" fill="#2a2f35"/>';
+    s += '<text x="' + cx + '" y="418" class="tb" text-anchor="middle">' + st[0] + ' stroke</text>';
     // timing circle
     var ox = 410, oy = 190, R1 = 120;
     function pt(a2, rad) { var q = (a2 - 90) * Math.PI / 180; return [ox + rad * Math.cos(q), oy + rad * Math.sin(q)]; }

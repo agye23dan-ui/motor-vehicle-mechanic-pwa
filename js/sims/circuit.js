@@ -62,7 +62,15 @@ function defaults(layout) {
   return P;
 }
 
-function seg(pts, cls) { return '<path d="M' + pts.map(function (p) { return p[0] + ' ' + p[1]; }).join('L') + '" class="' + cls + '"/>'; }
+var flowDur = 0;
+var CORE = { 'wire-pos': '#d93a2b', 'wire-gnd': '#3c424a', 'k2': '#9aa2aa' };
+/* An insulated wire: a dark sleeve with the coloured core inside. While current flows, white dashes run along it. */
+function seg(pts, cls) {
+  var d = 'M' + pts.map(function (p) { return p[0] + ' ' + p[1]; }).join('L');
+  var out = '<path d="' + d + '" fill="none" stroke="#15171a" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/><path d="' + d + '" fill="none" stroke="' + (CORE[cls] || '#9aa2aa') + '" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>';
+  if (flowDur && cls !== 'k2') out += '<path d="' + d + '" fill="none" stroke="#fff" stroke-opacity="0.75" stroke-width="2" stroke-linecap="round" class="cflow" style="animation-duration:' + flowDur + 's;animation-delay:-' + ((performance.now() / 1000) % flowDur).toFixed(3) + 's"/>';
+  return out;
+}
 // Orthogonal wire from a to b. mode: hvh (default), vh (vertical first), hv (horizontal first), wrap (leave to the right, come back).
 function route(a, b, mode) {
   if (mode === 'vh') return [a, [a[0], b[1]], b];
@@ -72,6 +80,7 @@ function route(a, b, mode) {
 }
 
 function drawing(s, o, P) {
+  flowDur = o.i > 0 ? Math.max(0.15, 2.2 / (0.25 + o.i / 6)).toFixed(2) : 0;
   var bright = clamp(o.lampW / s.watts, 0, 1.15);
   var live = o.i > 0;
   var wire = live ? 'wire-pos' : 'k2', gnd = live ? 'wire-gnd' : 'k2';
@@ -107,20 +116,36 @@ function drawing(s, o, P) {
   X += '<defs><marker id="ar" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M1 1.5 9 5 1 8.5z" class="head"/></marker></defs>';
   X += W;
   function part(id, inner) { return '<g data-part="' + id + '" style="cursor:grab" transform="translate(' + P[id].x + ' ' + P[id].y + ')">' + inner + '</g>'; }
-  X += part('batt', '<rect x="0" y="0" width="40" height="80" rx="4" class="metal"/><text x="20" y="-6" class="tb" text-anchor="middle">+</text><text x="20" y="98" class="tb" text-anchor="middle">−</text><text x="50" y="45" class="tb">' + r(s.v, 1) + ' V</text>');
-  X += part('fuse', '<rect x="-20" y="-12" width="40" height="24" rx="3" class="box' + (o.blown ? ' tint-m' : '') + '"/>' +
-    (o.blown ? '<path d="M-12 0l8-6 4 12 8-8" class="k"/>' : '<path d="M-16 0H16" class="k"/>') +
+  X += '<defs><radialGradient id="ciGlow"><stop offset="0" stop-color="#ffe9a0" stop-opacity="0.9"/><stop offset="1" stop-color="#ffd25a" stop-opacity="0"/></radialGradient>' +
+    '<linearGradient id="ciMetal" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#e6eaee"/><stop offset="1" stop-color="#8b949d"/></linearGradient></defs>';
+  X += part('batt', '<rect x="0" y="0" width="40" height="80" rx="5" fill="#262a2f" stroke="#101214"/><rect x="0" y="0" width="40" height="14" rx="5" fill="#3a4047"/>' +
+    '<rect x="8" y="22" width="24" height="48" rx="3" fill="#e9eef0"/><text transform="rotate(-90 20 46)" x="20" y="51" text-anchor="middle" style="fill:#14181c;stroke:none;font:800 14px sans-serif">12 V</text>' +
+    '<rect x="12" y="-9" width="16" height="11" rx="2" fill="#d93a2b" stroke="#6b1a12"/><rect x="12" y="78" width="16" height="11" rx="2" fill="#2a2f35" stroke="#101214"/>' +
+    '<text x="20" y="-14" class="tb" text-anchor="middle">+</text><text x="20" y="106" class="tb" text-anchor="middle">−</text><text x="50" y="45" class="tb">' + r(s.v, 1) + ' V</text>');
+  var fuseColour = { 5: '#c8a46a', 10: '#d9453a', 15: '#6aa7d9', 20: '#e8d34a' }[s.fuse] || '#c8a46a';
+  X += part('fuse', '<rect x="-20" y="-12" width="40" height="24" rx="3" fill="' + fuseColour + '" stroke="#3b4148"/><rect x="-13" y="-7" width="26" height="14" rx="2" fill="#f3f6f8" fill-opacity="0.6"/>' +
+    (o.blown ? '<path d="M-12 0H-4M4 0H12" stroke="#59626b" stroke-width="2.4"/><path d="M-4 0l3-5M4 0l-3 5" stroke="#d6335a" stroke-width="1.6"/><rect x="-13" y="-7" width="26" height="14" rx="2" fill="#2a2f35" opacity="0.55"/>' : '<path d="M-12 0H12" stroke="#8d96a0" stroke-width="2.4"/>') +
+    '<rect x="-17" y="12" width="8" height="6" fill="#c8cdd2"/><rect x="9" y="12" width="8" height="6" fill="#c8cdd2"/>' +
     '<text x="0" y="-22" class="ts" text-anchor="middle">' + (o.blown ? 'Blown' : s.fuse + ' A fuse') + '</text>');
-  X += part('sw', '<rect x="-34" y="-24" width="68" height="40" fill="transparent"/><circle cx="-30" cy="0" r="4" class="k"/><circle cx="30" cy="0" r="4" class="k"/>' +
-    (s.on ? '<path d="M-30 0L30 0" class="k bold"/>' : '<path d="M-30 0L22 -22" class="k bold"/>') +
+  X += part('sw', '<rect x="-34" y="-24" width="68" height="40" fill="transparent"/><rect x="-30" y="-10" width="60" height="22" rx="5" fill="#2b2f35" stroke="#101214"/>' +
+    '<circle cx="-30" cy="0" r="5" fill="url(#ciMetal)" stroke="#59626b"/><circle cx="30" cy="0" r="5" fill="url(#ciMetal)" stroke="#59626b"/>' +
+    (s.on ? '<rect x="-27" y="-4" width="54" height="8" rx="3" fill="#c8cdd2" stroke="#59626b"/>' : '<g transform="rotate(-24 -27 0)"><rect x="-27" y="-4" width="54" height="8" rx="3" fill="#c8cdd2" stroke="#59626b"/></g>') +
+    '<circle cx="0" cy="10" r="2.6" fill="' + (s.on ? '#2fae5f' : '#5a1f1a') + '"/>' +
     '<text x="0" y="-30" class="ts" text-anchor="middle">Switch ' + (s.on ? 'on' : 'off') + '</text>');
   lamps.forEach(function (l, i) {
-    X += part('l' + i, '<circle r="' + (14 + bright * 5) + '" class="tint-y" style="fill-opacity:' + (0.15 + 0.6 * clamp(bright, 0, 1)).toFixed(2) + '"/><circle r="14" class="box"/><path d="M-9 -9L9 9M9 -9L-9 9" class="k"/>');
+    var b = clamp(bright, 0, 1.2);
+    X += part('l' + i, '<circle r="' + (16 + b * 14).toFixed(1) + '" fill="url(#ciGlow)" opacity="' + clamp(b, 0, 1).toFixed(2) + '"/>' +
+      '<circle r="14" fill="#e9f1f4" fill-opacity="' + (0.25 + 0.55 * clamp(b, 0, 1)).toFixed(2) + '" stroke="#8d96a0" stroke-width="1.5"/>' +
+      '<path d="M-6 9V-1L-3 -6L0 -1L3 -6L6 -1V9" fill="none" stroke="' + (b > 0.05 ? '#ffb41f' : '#59626b') + '" stroke-width="' + (1.6 + b).toFixed(1) + '" stroke-linejoin="round"/>' +
+      '<rect x="-7" y="12" width="14" height="6" rx="1" fill="url(#ciMetal)" stroke="#59626b"/>');
   });
-  X += part('earth', '<rect x="-40" y="-12" width="80" height="24" rx="3" class="box' + (s.earth > 0.3 ? ' tint-m' : '') + '"/><text x="0" y="5" class="tsm" text-anchor="middle">Earth ' + r(s.earth, 2) + ' Ω</text>');
+  X += part('earth', '<rect x="-40" y="-8" width="80" height="16" rx="3" fill="' + (s.earth > 0.3 ? '#a8742f' : '#8d96a0') + '" stroke="#3b4148"/>' +
+    '<circle cx="-32" cy="0" r="3.5" fill="#c8cdd2" stroke="#3b4148"/><circle cx="32" cy="0" r="3.5" fill="#c8cdd2" stroke="#3b4148"/>' +
+    '<path d="M-14 14H14M-9 19H9M-4 24H4" stroke="#59626b" stroke-width="2" stroke-linecap="round"/>' +
+    '<text x="0" y="-14" class="tsm" text-anchor="middle">Earth ' + r(s.earth, 2) + ' Ω</text>');
   var cap = lamps.length ? lamps[Math.floor((lamps.length - 1) / 2)] : { x: 400, y: 50 };
   X += '<text x="' + cap.x + '" y="' + (series ? cap.y + 42 : BOT + 40) + '" class="ts" text-anchor="middle">' + s.n + ' lamp' + (s.n > 1 ? 's' : '') + ' in ' + s.layout + '</text>';
-  X += '<text x="' + (maxX - 8) + '" y="264" class="tsm" text-anchor="end">Drag any part to move it</text>';
+  X += '<text x="' + (maxX - 8) + '" y="14" class="tsm" text-anchor="end" style="font-size:10px">Drag any part to move it</text>';
   if (s.fault === 'open') X += '<path d="M' + (openAt[0] - 9) + ' ' + (openAt[1] - 12) + 'l18 24M' + (openAt[0] + 9) + ' ' + (openAt[1] - 12) + 'l-18 24" class="k bold" style="stroke:var(--magenta-ink)"/><text x="' + openAt[0] + '" y="' + (openAt[1] + 32) + '" class="tsm" text-anchor="middle">Break</text>';
   if (s.fault === 'short') X += '<path d="M' + openAt[0] + ' ' + openAt[1] + 'L' + (openAt[0] - 8) + ' 80L' + (openAt[0] + 8) + ' 100L' + (openAt[0] - 8) + ' 130L' + (openAt[0] + 8) + ' 150L' + openAt[0] + ' 220" class="k" style="stroke:var(--magenta-ink)"/><text x="' + (openAt[0] + 18) + '" y="150" class="tsm">Short to body</text>';
   if (s.fault === 'posR') X += '<rect x="' + (bpos[0] - 7) + '" y="' + (bpos[1] - 30) + '" width="14" height="16" rx="2" class="tint-m"/><text x="' + (bpos[0] + 14) + '" y="' + (bpos[1] - 18) + '" class="tsm">Corroded</text>';

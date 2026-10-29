@@ -19,6 +19,56 @@ function torque(rpm) {                       // simple torque curve in N m
   return Math.max(60, t);
 }
 
+/* The picture is redrawn on every change, so each animation takes a delay from the clock to keep its place. */
+function phase(period) { return '-' + ((performance.now() / 1000) % period).toFixed(3) + 's'; }
+
+/* A section through a manual gearbox. Each pair of gears is drawn at its true size ratio, so a low gear shows a big
+   layshaft gear meshing a small output gear. The engaged pair and the torque path through it are highlighted. */
+function cutaway(box, gear, rpm, ratioNow) {
+  var D = 80, yIn = 78, yLay = 158, n = box.ratios.length;
+  var x0 = 150, slot = (524 - x0) / n;
+  var cin = 1.22;                                                     // the constant-mesh pair from the input shaft
+  var layRpm = rpm / cin, outRpm = rpm / ratioNow;
+  var dashDur = function (v) { return (60 / Math.max(60, v) * 6).toFixed(2); };
+  var shaft = function (x1, y, x2, v, colour, w) {
+    var dd = dashDur(v);
+    return '<path d="M' + x1 + ' ' + y + 'H' + x2 + '" stroke="' + colour + '" stroke-width="' + w + '"/>' +
+      '<path d="M' + x1 + ' ' + y + 'H' + x2 + '" stroke="#fff" stroke-opacity="0.5" stroke-width="2" stroke-dasharray="5 11" class="cflow" style="animation-duration:' + dd + 's;animation-delay:' + phase(+dd) + '"/>';
+  };
+  var teeth = function (x, y, h, wd, up) {
+    var t = '';
+    for (var k = -Math.floor(h / 12); k <= Math.floor(h / 12); k++) t += '<rect x="' + (x - wd / 2 - 3) + '" y="' + (y + k * 6 - 1.5) + '" width="3" height="3" fill="#555d66"/><rect x="' + (x + wd / 2) + '" y="' + (y + k * 6 - 1.5) + '" width="3" height="3" fill="#555d66"/>';
+    return t;
+  };
+  var g = '<defs><linearGradient id="gbMetal" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#a9b0b7"/><stop offset="0.5" stop-color="#e3e7eb"/><stop offset="1" stop-color="#a9b0b7"/></linearGradient>' +
+    '<linearGradient id="gbCase" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#555d66"/><stop offset="1" stop-color="#30353b"/></linearGradient></defs>';
+  g += '<path d="M24 20H536V252H24Z" fill="url(#gbCase)" stroke="#1d2024" stroke-width="2"/><path d="M34 30H526V242H34Z" fill="#1b1e22" stroke="#101214"/>';
+  g += '<path d="M24 30H4V108H24" fill="#3a4047" stroke="#1d2024"/><text transform="rotate(-90 15 70)" x="15" y="73" text-anchor="middle" style="font-size:9px;fill:#e8edf1;stroke:none">Clutch</text>';
+  // shafts
+  g += shaft(4, yIn, 80, rpm, '#8d96a0', 9) + shaft(80, yIn, 548, outRpm, '#8d96a0', 9) + shaft(60, yLay, 524, layRpm, '#7d868f', 9);
+  // constant-mesh pair on the input shaft
+  var rIn = D / (1 + cin), rLayIn = D - rIn;
+  g += '<rect x="72" y="' + (yIn - rIn).toFixed(1) + '" width="16" height="' + (2 * rIn).toFixed(1) + '" rx="2" fill="url(#gbMetal)" stroke="#3b4148"/>' + teeth(80, yIn, 2 * rIn, 16);
+  g += '<rect x="72" y="' + (yLay - rLayIn).toFixed(1) + '" width="16" height="' + (2 * rLayIn).toFixed(1) + '" rx="2" fill="url(#gbMetal)" stroke="#3b4148"/>' + teeth(80, yLay, 2 * rLayIn, 16);
+  // one pair of gears for each ratio
+  box.ratios.forEach(function (rt, i) {
+    var x = x0 + (i + 0.5) * slot, on = i === gear;
+    var rMain = D / (1 + rt), rLay = D - rMain;
+    var edge = on ? '#d6335a' : '#3b4148', fill = on ? '#f3d4dc' : 'url(#gbMetal)';
+    g += '<rect x="' + (x - 9) + '" y="' + (yIn - rMain).toFixed(1) + '" width="18" height="' + (2 * rMain).toFixed(1) + '" rx="2" fill="' + fill + '" stroke="' + edge + '" stroke-width="' + (on ? 2.4 : 1) + '"/>' + teeth(x, yIn, 2 * rMain, 18);
+    g += '<rect x="' + (x - 9) + '" y="' + (yLay - rLay).toFixed(1) + '" width="18" height="' + (2 * rLay).toFixed(1) + '" rx="2" fill="' + fill + '" stroke="' + edge + '" stroke-width="' + (on ? 2.4 : 1) + '"/>' + teeth(x, yLay, 2 * rLay, 18);
+    g += '<text x="' + x + '" y="234" text-anchor="middle" style="font-size:12px;font-weight:800;fill:' + (on ? '#ff6f8f' : '#e8edf1') + ';stroke:none">' + (i + 1) + '</text>';
+    if (on) {
+      g += '<rect x="' + (x - 24) + '" y="' + (yIn - 8) + '" width="12" height="16" rx="2" fill="#c8cdd2" stroke="#59626b"/><path d="M' + (x - 18) + ' ' + (yIn - 8) + 'V22" stroke="#d6335a" stroke-width="3"/><rect x="' + (x - 26) + '" y="20" width="16" height="7" rx="2" fill="#d6335a"/>';
+    }
+  });
+  // torque path: input shaft, constant pair, layshaft, selected gear, output shaft
+  var xs = x0 + (gear + 0.5) * slot;
+  g += '<path d="M4 ' + yIn + 'H80V' + yLay + 'H' + xs.toFixed(1) + 'V' + yIn + 'H548" fill="none" stroke="#d6335a" stroke-width="3" stroke-linejoin="round" stroke-dasharray="2 5" stroke-opacity="0.9"/>';
+  g += '<text x="280" y="270" class="tsm" text-anchor="middle" style="font-size:10px">Input ' + r(rpm, 0) + ' rpm → layshaft ' + r(layRpm, 0) + ' → output ' + r(outRpm, 0) + ' rpm · gear ' + (gear + 1) + ' engaged · ' + r(ratioNow, 2) + ' : 1</text>';
+  return g;
+}
+
 export function build() {
   var holder = h('div', { class: 'sim-figure' });
   var out = readout();
@@ -36,8 +86,9 @@ export function build() {
     var grade = Math.atan(net / (mass * 9.81)) * 100 / 1;                       // percent (rise over run, small angle)
     grade = Math.tan(Math.asin(clamp(net / (mass * 9.81), 0, 0.9))) * 100;
     // chart: speed on x (0..220), rpm on y
-    var W = 560, Hh = 320, gx = 50, gy = 20, gw = 480, gh = 250, vmax = 220;
-    var s = '<svg xmlns="http://www.w3.org/2000/svg" class="dg" viewBox="0 0 ' + W + ' ' + Hh + '" role="img" aria-label="Engine speed against road speed for each gear"><title>Gear chart</title><desc>One line per gear showing engine speed against road speed.</desc>';
+    var W = 560, Hh = 320, gx = 50, gy = 20, gw = 480, gh = 250, vmax = 220, TOP = 284;
+    var s = '<svg xmlns="http://www.w3.org/2000/svg" class="dg" viewBox="0 0 ' + W + ' ' + (Hh + TOP) + '" role="img" aria-label="Engine speed against road speed for each gear"><title>Gearbox</title><desc>A section through the gearbox with the engaged gear highlighted, and a chart of engine speed against road speed for each gear.</desc>';
+    s += cutaway(box, gear, rpm, ratio) + '<g transform="translate(0 ' + TOP + ')">';
     s += '<rect x="' + gx + '" y="' + gy + '" width="' + gw + '" height="' + gh + '" class="box"/>';
     [0, 1000, 2000, 3000, 4000, 5000, 6000, 7000].forEach(function (v) {
       var y = gy + gh - v / 7000 * gh;
@@ -58,7 +109,7 @@ export function build() {
     var mx = gx + clamp(kmh, 0, vmax) / vmax * gw, my = gy + gh - rpm / 7000 * gh;
     s += '<circle cx="' + mx.toFixed(1) + '" cy="' + my.toFixed(1) + '" r="7" class="box tint-y"/>';
     s += '<text x="' + (gx + gw / 2) + '" y="' + (Hh - 6) + '" class="tb" text-anchor="middle">Road speed (km/h)</text>';
-    s += '</svg>';
+    s += '</g></svg>';
     paint(holder, s);
     var topSpeed = REDLINE / total * circ * 60 / 1000;
     out.set([
