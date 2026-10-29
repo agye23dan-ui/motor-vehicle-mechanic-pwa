@@ -131,7 +131,7 @@
 
 /* The drawing stays put while the parts and tools scroll beside or under it */
 .asm-layout .sim-main { position: sticky; top: var(--top-h); z-index: 5; background: var(--paper); padding-bottom: 0.4rem; align-self: start; }
-.asm-layout .asm-svg, .asm-layout .veh-svg { max-height: 38vh; }
+.asm-layout .asm-svg, .asm-layout .veh-svg { max-height: calc(var(--vh, 1vh) * 38); }
 .asm-layout .asm-log { max-height: 7.5rem; overflow: hidden; }
 .asm-layout .asm-msg { padding: 0.35rem 0.7rem; font-size: 0.9rem; }
 .asm-layout .asm-msg:nth-child(n+3) { display: none; }
@@ -139,8 +139,8 @@
   .asm-layout .sim-main { top: 0.5rem; }
 }
 @media (min-width: 980px) {
-  .asm-layout .asm-svg, .asm-layout .veh-svg { max-height: calc(100vh - 16rem); }
-  .asm-layout > .asm-side { position: sticky; top: 0.5rem; max-height: calc(100vh - 1rem); overflow-y: auto; align-self: start; padding-right: 0.3rem; }
+  .asm-layout .asm-svg, .asm-layout .veh-svg { max-height: calc(var(--vh, 1vh) * 100 - 16rem); }
+  .asm-layout > .asm-side { position: sticky; top: 0.5rem; max-height: calc(var(--vh, 1vh) * 100 - 1rem); overflow-y: auto; align-self: start; padding-right: 0.3rem; }
 }
 
 /* 3D Engine exploded view simulation */
@@ -188,7 +188,7 @@
   width: 100%;
   height: 680px;
   min-height: 520px;
-  max-height: 80vh;
+  max-height: calc(var(--vh, 1vh) * 80);
   border: 0;
   display: block;
   background: #ffffff;
@@ -197,15 +197,15 @@
   border-radius: 0;
   border: 0;
   width: 100vw;
-  height: 100vh;
+  height: calc(var(--vh, 1vh) * 100);
 }
 .sim-3d-wrap:fullscreen .sim-3d-iframe {
-  height: calc(100vh - 48px);
+  height: calc(var(--vh, 1vh) * 100 - 48px);
   max-height: none;
 }
 @media (max-width: 640px) {
   .sim-3d-iframe {
-    height: 78vh;
+    height: calc(var(--vh, 1vh) * 78);
     min-height: 560px;
   }
 }

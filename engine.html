@@ -4,6 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>3D Engine Exploded View & Assembly Visualizer</title>
+    <script>
+        // Some Android app WebViews report the screen-height unit (vh) as 0, so read the real window height instead.
+        (function () {
+            function setVh() { document.documentElement.style.setProperty('--vh', (window.innerHeight * 0.01) + 'px'); }
+            setVh(); window.addEventListener('resize', setVh);
+        })();
+    </script>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome Icons -->
@@ -24,15 +31,14 @@
 
         /* Phone browsers count the hidden address bar in 100vh, which pushed the bottom controls off screen. */
         html, body { height: 100%; }
-        body { height: 100dvh !important; }
+        body { height: calc(var(--vh, 1vh) * 100) !important; }
         @media (max-width: 639px) {
             .part-label { font-size: 9px; padding: 1px 5px; }
         }
 
         #canvas-container {
             width: 100vw;
-            height: 100vh;
-            height: 100dvh;
+            height: calc(var(--vh, 1vh) * 100);
             position: absolute;
             top: 0;
             left: 0;

@@ -20,6 +20,13 @@ import * as settings from './views/settings.js';
 var main = document.getElementById('main');
 var current = null;
 
+/* Some Android app WebViews report the screen-height unit (vh) as 0, which collapsed drawings that were capped at a
+   share of the screen height. The real window height is read here and offered as --vh, which the CSS uses instead. */
+function setViewportUnit() { document.documentElement.style.setProperty('--vh', (window.innerHeight * 0.01) + 'px'); }
+setViewportUnit();
+window.addEventListener('resize', setViewportUnit);
+window.addEventListener('orientationchange', setViewportUnit);
+
 var ROUTES = [
   [/^$|^learn$/, 'learn', function () { return learn.render(); }],
   [/^module\/(m\d+)$/, 'learn', function (p) { return mod.overview(p); }],
