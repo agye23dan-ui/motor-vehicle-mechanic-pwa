@@ -1,5 +1,6 @@
 /* Diagrams for m14, m15. */
 import { DIAGRAMS, wrap, t, badge, box, node } from './core.js';
+import { finnedCoil, fanIcon, compressor, drier, valveBlock, hose } from './parts.js';
 
 /* ---------------- A/C refrigeration cycle ---------------- */
 DIAGRAMS['ac-cycle'] = {
@@ -11,34 +12,31 @@ DIAGRAMS['ac-cycle'] = {
     s += '<path d="M316 100H324V160H316M316 220H324V284H316" class="dim"/>';
     /* pipes: gas drawn twice so it reads darker than liquid */
     var gas1 = 'M340 168V80H290', liq1 = 'M170 80H120V112M120 158V176', mix = 'M120 204V292H170', gas2 = 'M290 292H340V212';
-    s += '<path d="' + gas1 + '" class="pipe hot"/><path d="' + gas1 + '" class="pipe hot"/>';
-    s += '<path d="' + liq1 + '" class="pipe hot"/>';
-    s += '<path d="' + mix + '" class="pipe cold"/>';
-    s += '<path d="' + gas2 + '" class="pipe cold"/><path d="' + gas2 + '" class="pipe cold"/>';
+    s += hose(gas1, '#d9534f', 8) + hose(liq1, '#e8913a', 7) + hose(mix, '#5aa9e6', 7) + hose(gas2, '#8fd0f0', 8);
     /* flow arrows */
     s += '<path d="M340 150V128M326 80H306M152 80H134M120 224V246M138 292H160M302 292H322M340 268V240" class="k" marker-end="url(#ar)"/>';
     /* condenser */
-    s += box(170, 58, 120, 44, 'tint-m-soft') + t(230, 85, 'Condenser', 'tb', 'middle');
+    s += finnedCoil(170, 58, 120, 44, '#d9534f') + '<rect x="196" y="72" width="68" height="16" rx="4" style="fill:#fff;fill-opacity:0.82"/>' + t(230, 85, 'Condenser', 'tb', 'middle');
     s += '<path d="M195 52V36M230 52V36M265 52V36" class="wire-pos" marker-end="url(#ar)"/>' + t(230, 22, 'Heat out', 't-red', 'middle');
-    s += '<circle cx="230" cy="124" r="11" class="box"/><path d="M222 124H238M230 116V132" class="k2"/>' + t(246, 129, 'Fan', 'ts');
+    s += fanIcon(230, 124, 11, 5) + t(248, 129, 'Fan', 'ts');
     s += t(230, 156, 'Gas turns to liquid', 'ts', 'middle') + t(230, 180, 'HIGH SIDE', 't-red', 'middle');
     /* receiver-drier */
-    s += box(110, 112, 20, 46, 'tint-m-soft');
+    s += drier(108, 112, 24, 46);
     s += t(104, 128, 'Receiver-drier', 'tb', 'end') + t(104, 146, 'Holds liquid', 'ts', 'end');
     /* expansion */
-    s += box(106, 176, 28, 28) + '<path d="M110 180L130 200V180L110 200Z" class="k2"/>';
+    s += valveBlock(106, 176, 28);
     s += t(100, 186, 'Expansion', 'tb', 'end') + t(100, 204, 'valve: pressure', 'ts', 'end') + t(100, 220, 'drops', 'ts', 'end');
     /* compressor */
-    s += box(308, 168, 64, 44, 'metal') + '<circle cx="340" cy="190" r="13" class="k2"/><path d="M340 190L348 182" class="k2"/>';
-    s += t(380, 186, 'Compressor', 'tb') + t(380, 204, 'Squeezes gas', 'ts');
+    s += compressor(308, 168, 56, 44);
+    s += t(474, 236, 'Compressor', 'tb', 'end') + t(474, 252, 'Squeezes gas', 'ts', 'end');
     /* evaporator */
-    s += box(170, 270, 120, 44, 'tint-c-soft') + t(230, 297, 'Evaporator', 'tb', 'middle');
+    s += finnedCoil(170, 270, 120, 44, '#5aa9e6') + '<rect x="196" y="284" width="68" height="16" rx="4" style="fill:#fff;fill-opacity:0.82"/>' + t(230, 297, 'Evaporator', 'tb', 'middle');
     s += t(230, 214, 'LOW SIDE', 't-blue', 'middle');
     s += '<path d="M205 266V244M230 266V244M255 266V244" class="wire-sig" marker-end="url(#ar)"/>' + t(230, 236, 'Cold air out', 't-blue', 'middle');
     s += t(108, 280, 'Liquid boils,', 'ts', 'end') + t(108, 298, 'absorbs heat', 'ts', 'end');
     s += '<path d="M205 372V324M230 372V324M255 372V324" class="wire-pos" marker-end="url(#ar)"/>';
     s += t(190, 350, 'Warm cabin', 'ts', 'end') + t(190, 366, 'air in', 'ts', 'end');
-    s += '<circle cx="230" cy="392" r="11" class="box"/><path d="M222 392H238M230 384V400" class="k2"/>' + t(246, 397, 'Blower fan', 'ts');
+    s += fanIcon(230, 392, 11, 8) + t(248, 397, 'Blower fan', 'ts');
     /* key */
     var kx = [14, 250], ky = [428, 448], lab = ['High-pressure gas', 'High-pressure liquid', 'Low-pressure liquid + vapour', 'Low-pressure gas'];
     var cls = [['pipe hot', 2], ['pipe hot', 1], ['pipe cold', 1], ['pipe cold', 2]];

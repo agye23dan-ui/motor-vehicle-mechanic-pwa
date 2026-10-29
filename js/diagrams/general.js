@@ -1,5 +1,6 @@
 /* Diagrams for m01, m02, m03, m21. */
-import { DIAGRAMS, wrap, t, badge, box, node } from './core.js';
+import { DIAGRAMS, wrap, t, badge, box, node } from './core.js';
+import { finnedCoil, drier, fanIcon, STEEL, DARK, PAINT_RED } from './parts.js';
 
 
 /* ---------------- Lift points ---------------- */
@@ -143,17 +144,23 @@ DIAGRAMS['underbonnet-layout'] = {
   caption: 'A typical engine bay seen from above. Layout varies from car to car, so find each part on your own vehicle first.',
   svg: function () {
     var s = t(240, 16, 'FRONT', 'ts', 'middle') +
-      '<rect x="90" y="22" width="300" height="240" rx="16" class="k2"/>' +
+      '<rect x="90" y="22" width="300" height="240" rx="16" style="fill:url(#shMetal);fill-opacity:0.2;stroke:#59626b;stroke-width:2"/>' +
       '<path d="M90 262H390" class="k bold"/>' + t(240, 282, 'Bulkhead (windscreen side)', 'ts', 'middle') +
-      box(104, 30, 272, 26, 'tint-c-soft') + badge(240, 43, 8) +
-      box(108, 68, 38, 38, 'tint-c') + badge(127, 87, 2) +
-      box(108, 150, 38, 50, 'tint-c-soft') + badge(127, 175, 5) +
-      '<rect x="160" y="70" width="138" height="136" rx="6" class="metal"/>' + badge(200, 104, 1) +
-      '<rect x="330" y="66" width="42" height="38" rx="4" class="zone"/>' + badge(351, 85, 7) +
-      box(318, 116, 58, 64, 'tint-k-soft') + badge(347, 148, 6) +
-      box(108, 214, 64, 38, 'tint-m-soft') + badge(140, 233, 4) +
-      box(262, 220, 56, 32, 'tint-y-soft') + badge(290, 236, 9) +
-      '<rect x="346" y="232" width="22" height="30" class="metal"/><rect x="338" y="206" width="38" height="28" rx="3" class="box tint-y-soft"/>' + badge(357, 220, 3);
+      finnedCoil(108, 32, 264, 22, '#5aa9e6', false) + badge(240, 43, 8) +
+      /* coolant tank: translucent with a level */
+      '<rect x="108" y="68" width="38" height="38" rx="6" style="fill:#e9eef0;fill-opacity:0.85;stroke:#59626b;stroke-width:1.4"/><rect x="111" y="82" width="32" height="21" rx="3" style="fill:#7fd0c8;fill-opacity:0.8"/><rect x="118" y="62" width="14" height="8" rx="2" style="' + DARK + '"/>' + badge(127, 87, 2) +
+      '<rect x="108" y="150" width="38" height="50" rx="6" style="fill:#e9eef0;fill-opacity:0.85;stroke:#59626b;stroke-width:1.4"/><rect x="111" y="166" width="32" height="31" rx="3" style="fill:#4aa3df;fill-opacity:0.7"/><rect x="118" y="144" width="14" height="8" rx="2" style="fill:#2a60c0"/>' + badge(127, 175, 5) +
+      /* the engine: cast block with a valve cover, intake and exhaust sides */
+      '<rect x="160" y="70" width="138" height="136" rx="8" style="' + DARK + '"/><rect x="178" y="84" width="102" height="108" rx="6" style="' + STEEL + '"/><rect x="192" y="98" width="74" height="80" rx="5" style="fill:#2a2e34;stroke:#101214"/>' +
+      [0, 1, 2, 3].map(function (q) { return '<circle cx="' + (205 + q * 18) + '" cy="116" r="5" style="fill:#15171a"/>'; }).join('') + '<circle cx="257" cy="170" r="6" style="' + PAINT_RED + '"/>' + badge(200, 140, 1) +
+      '<rect x="330" y="66" width="42" height="38" rx="5" style="fill:#e9eef0;fill-opacity:0.6;stroke:#d6335a;stroke-width:1.6;stroke-dasharray:4 3"/><rect x="341" y="60" width="14" height="8" rx="2" style="' + DARK + '"/>' + badge(351, 85, 7) +
+      '<rect x="318" y="116" width="58" height="64" rx="8" style="fill:#2a2f35;stroke:#101214;stroke-width:1.4"/><path d="M330 126V170M342 126V170M354 126V170M366 126V170" style="stroke:#6b737c;stroke-width:1.4"/>' + badge(347, 148, 6) +
+      /* battery with terminals */
+      '<rect x="108" y="214" width="64" height="38" rx="5" style="fill:#2a2f35;stroke:#101214;stroke-width:1.4"/><rect x="108" y="214" width="64" height="9" rx="4" style="fill:#3a4047"/><rect x="116" y="209" width="10" height="7" rx="2" style="fill:#d93a2b"/><rect x="154" y="209" width="10" height="7" rx="2" style="fill:#14171a"/>' + badge(140, 237, 4) +
+      /* fuse box */
+      '<rect x="262" y="220" width="56" height="32" rx="5" style="fill:#1d2024;stroke:#0a0b0d;stroke-width:1.4"/><path d="M272 228V244M282 228V244M292 228V244M302 228V244" style="stroke:#e0b04a;stroke-width:3"/>' + badge(290, 236, 9) +
+      /* brake master cylinder with its reservoir against the bulkhead */
+      '<rect x="346" y="232" width="22" height="30" rx="3" style="' + STEEL + '"/><rect x="338" y="206" width="38" height="28" rx="5" style="fill:#e9eef0;fill-opacity:0.85;stroke:#59626b;stroke-width:1.4"/><rect x="341" y="216" width="32" height="15" rx="3" style="fill:#e0b04a;fill-opacity:0.85"/><rect x="348" y="201" width="14" height="7" rx="2" style="' + DARK + '"/>' + badge(357, 220, 3);
     var L = ['Engine oil filler cap and dipstick', 'Coolant expansion tank', 'Brake fluid reservoir (on master cylinder)', 'Battery', 'Windscreen washer reservoir', 'Air filter box', 'Power steering reservoir (if fitted)', 'Radiator (at the front)', 'Fuse box'], i;
     for (i = 0; i < 9; i++) s += badge(30, 318 + i * 24, i + 1, 10) + t(50, 323 + i * 24, L[i], 't');
     return wrap(480, 536, 'Generic engine bay layout',

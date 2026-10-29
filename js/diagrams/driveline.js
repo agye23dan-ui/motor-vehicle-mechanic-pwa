@@ -1,5 +1,6 @@
 /* Diagrams for m16, m17. */
 import { DIAGRAMS, wrap, t, badge, box, node } from './core.js';
+import { STEEL, DARK, hose } from './parts.js';
 
 /* ---------------- Clutch assembly ---------------- */
 DIAGRAMS['clutch-assembly'] = {
@@ -7,21 +8,28 @@ DIAGRAMS['clutch-assembly'] = {
   svg: function () {
     var b = '';
     b += '<path d="M20 120H460" class="centre"/>';
-    b += '<path d="M24 120H56" class="k bold"/>' + t(22, 108, 'Crank', 'tsm');
-    b += '<rect x="56" y="48" width="36" height="144" rx="3" class="metal"/>';
-    b += '<rect x="102" y="54" width="14" height="132" rx="2" class="fl-oil"/><rect x="102" y="54" width="14" height="132" class="k"/>';
-    b += '<rect x="122" y="50" width="22" height="140" rx="3" class="metal-dark"/>';
-    b += '<path d="M92 40H220V60M92 200H220V180" class="k"/>';
-    b += '<path d="M144 62L214 100M144 178L214 140" class="k bold"/>';
-    b += '<rect x="214" y="100" width="30" height="40" rx="3" class="box tint-c"/>';
-    b += '<path d="M116 120H440" class="k bold"/>' + t(440, 108, 'Input shaft to the gearbox', 'tsm', 'end');
+    b += '<rect x="22" y="115" width="38" height="10" rx="3" style="' + STEEL + '"/>' + t(4, 108, 'Crank', 'tsm');
+    /* flywheel with a toothed ring gear, and the cover bolted to it */
+    b += '<rect x="56" y="48" width="36" height="144" rx="4" style="' + STEEL + '"/><rect x="50" y="46" width="8" height="148" rx="2" style="' + DARK + '"/>';
+    for (var q = 0; q < 14; q++) b += '<rect x="50" y="' + (52 + q * 10.2).toFixed(1) + '" width="6" height="5" fill="#262a2f"/>';
+    /* clutch disc: steel plate with a friction lining on each face and a splined hub */
+    b += '<rect x="106" y="54" width="6" height="132" rx="1" style="' + STEEL + '"/><rect x="100" y="56" width="6" height="128" rx="2" style="fill:#3b3834;stroke:#14110f"/><rect x="112" y="56" width="6" height="128" rx="2" style="fill:#3b3834;stroke:#14110f"/>';
+    b += '<rect x="102" y="106" width="18" height="28" rx="3" style="' + DARK + '"/>';
+    /* pressure plate and cover */
+    b += '<rect x="122" y="50" width="22" height="140" rx="4" style="' + DARK + '"/>';
+    b += '<path d="M92 40H220V60M92 200H220V180" style="fill:none;stroke:#1d2024;stroke-width:5;stroke-linejoin:round"/><path d="M92 40H220V60M92 200H220V180" style="fill:none;stroke:#aeb5bc;stroke-width:3;stroke-linejoin:round"/>';
+    /* diaphragm spring fingers */
+    b += '<path d="M144 62L214 100M144 178L214 140" style="stroke:#1d2024;stroke-width:7;stroke-linecap:round"/><path d="M144 62L214 100M144 178L214 140" style="stroke:#c0392b;stroke-width:4;stroke-linecap:round"/>';
+    /* release bearing and input shaft */
+    b += '<rect x="214" y="100" width="30" height="40" rx="4" style="' + STEEL + '"/><path d="M229 102V138" style="stroke:#59626b;stroke-width:1.2"/>';
+    b += '<rect x="116" y="115" width="326" height="10" rx="4" style="' + STEEL + '"/>' + t(440, 108, 'Input shaft to the gearbox', 'tsm', 'end');
     b += badge(74, 30, '1') + badge(109, 30, '2') + badge(133, 30, '3') + badge(190, 30, '4') + badge(229, 82, '5');
     var L = [['1', 'Flywheel (bolted to the crankshaft)'], ['2', 'Clutch disc with friction lining'], ['3', 'Pressure plate'], ['4', 'Diaphragm spring in the cover: clamps the disc'], ['5', 'Release bearing: pressed in by the fork when the pedal is down']];
     L.forEach(function (r, i) { b += badge(24, 226 + i * 22, r[0], 9) + t(42, 230 + i * 22, r[1], 'ts'); });
     b += t(240, 354, 'Hydraulic control (some cars use a cable)', 'tb', 'middle');
-    b += box(30, 366, 80, 34, 'tint-y-soft') + t(70, 388, 'Pedal', 'tsm', 'middle');
-    b += box(140, 366, 100, 34, 'tint-c-soft') + t(190, 380, 'Master', 'tsm', 'middle') + t(190, 394, 'cylinder', 'tsm', 'middle');
-    b += box(270, 366, 100, 34, 'tint-c-soft') + t(320, 380, 'Slave', 'tsm', 'middle') + t(320, 394, 'cylinder', 'tsm', 'middle');
+    b += '<rect x="30" y="366" width="80" height="34" rx="6" style="' + DARK + '"/><rect x="54" y="360" width="32" height="8" rx="2" style="fill:#15171a"/>' + t(70, 388, 'Pedal', 'tsm', 'middle').replace('<text', '<text style="fill:#fff;stroke:none"');
+    b += '<rect x="140" y="366" width="100" height="34" rx="6" style="' + STEEL + '"/><rect x="160" y="356" width="34" height="12" rx="3" style="fill:#e9eef0;stroke:#59626b"/>' + t(190, 380, 'Master', 'tsm', 'middle') + t(190, 394, 'cylinder', 'tsm', 'middle');
+    b += '<rect x="270" y="366" width="100" height="34" rx="6" style="' + STEEL + '"/><rect x="360" y="374" width="26" height="18" rx="3" style="' + DARK + '"/>' + t(320, 380, 'Slave', 'tsm', 'middle') + t(320, 394, 'cylinder', 'tsm', 'middle');
     b += box(390, 366, 70, 34) + t(425, 388, 'Fork', 'tsm', 'middle');
     b += '<path d="M110 383H140M240 383H270M370 383H390" class="k" marker-end="url(#ar)"/>';
     return wrap(480, 414, 'Clutch assembly',

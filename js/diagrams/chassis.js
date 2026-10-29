@@ -1,5 +1,6 @@
 /* Diagrams for m18, m19, m20. */
-import { DIAGRAMS, wrap, t, badge, box, node } from './core.js';
+import { DIAGRAMS, wrap, t, badge, box, node } from './core.js';
+import { hose, masterCylinder, booster, STEEL, DARK, RUBBER, PAINT_RED } from './parts.js';
 
 /* Annular sector as a polygon. Angles are in degrees, measured clockwise from the top. */
 function sector(cx, cy, r1, r2, a0, a1) {
@@ -73,35 +74,36 @@ DIAGRAMS['macpherson-strut'] = {
   svg: function () {
     var g = '<g transform="translate(0 16)">';
     g +=
-      '<rect x="60" y="18" width="300" height="12" class="box tint-k-soft"/>' + t(368, 28, 'Body', 'ts') +
+      '<rect x="60" y="18" width="300" height="12" rx="3" style="' + DARK + '"/>' + t(368, 28, 'Body', 'ts') +
       '<path d="M10 304H110" class="k2"/>' +
-      '<rect x="22" y="134" width="40" height="170" rx="8" class="metal-dark"/>' + t(42, 322, 'Wheel', 'ts', 'middle') +
-      /* strut: damper tube, rod, spring */
-      '<path d="M106 48V86" class="k bold"/>' +
-      '<rect x="98" y="86" width="16" height="76" class="box tint-m-soft"/>' +
-      '<path d="M84 62H128M84 136H128" class="k"/>' +
-      '<path d="' + zig(88, 124, 64, 1, 0).replace('L124 64', '') + '" class="k2"/>';
-    /* proper spring zigzag */
-    var d = 'M88 64', i, y;
-    for (i = 1; i <= 8; i++) { y = 64 + i * 9; d += 'L' + (i % 2 ? 124 : 88) + ' ' + y; }
-    g = g.replace(/<path d="M88 64[^>]*class="k2"\/>/, '<path d="' + d + '" class="k2"/>');
+      /* tyre with tread and a rim */
+      '<rect x="22" y="134" width="40" height="170" rx="12" style="' + RUBBER + '"/>' + [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14].map(function (q) { return '<path d="M26 ' + (146 + q * 10.5) + 'H58" style="stroke:#3a4048;stroke-width:1.6"/>'; }).join('') +
+      '<rect x="46" y="156" width="16" height="126" rx="3" style="' + STEEL + '"/>' + t(42, 322, 'Wheel', 'ts', 'middle') +
+      /* strut: damper tube with rod, and a coil spring on spring seats */
+      '<rect x="102" y="46" width="8" height="42" rx="3" style="fill:#e6eaee;stroke:#59626b"/>' +
+      '<rect x="96" y="88" width="20" height="74" rx="4" style="' + DARK + '"/><rect x="99" y="92" width="4" height="64" rx="2" style="fill:#fff;fill-opacity:0.3;stroke:none"/>' +
+      '<rect x="80" y="60" width="52" height="6" rx="2" style="' + STEEL + '"/><rect x="80" y="136" width="52" height="6" rx="2" style="' + STEEL + '"/>';
+    /* coil spring drawn as a series of coils, shaded */
+    var d = '', i, y;
+    for (i = 0; i <= 8; i++) { y = 66 + i * 8.6; d += (i ? 'L' : 'M') + (i % 2 ? 124 : 88) + ' ' + y.toFixed(1); }
+    g += '<path d="' + d + '" fill="none" stroke="#1d2024" stroke-width="5" stroke-linejoin="round"/><path d="' + d + '" fill="none" stroke="#c0392b" stroke-width="3" stroke-linejoin="round"/><path d="' + d + '" fill="none" stroke="#fff" stroke-opacity="0.4" stroke-width="1" stroke-linejoin="round" transform="translate(0 -1)"/>';
     g +=
-      '<rect x="88" y="30" width="36" height="18" class="box tint-m-soft"/><circle cx="106" cy="39" r="5" class="k2"/>' +
-      /* disc, knuckle */
-      '<rect x="84" y="154" width="34" height="104" class="metal"/>' +
-      '<rect x="70" y="140" width="8" height="130" class="metal-dark"/>' +
+      '<rect x="88" y="30" width="36" height="18" rx="4" style="' + DARK + '"/><circle cx="106" cy="39" r="6" style="fill:#e6eaee;stroke:#59626b"/><circle cx="106" cy="39" r="2" style="fill:#2a2f35"/>' +
+      /* knuckle, hub and brake disc */
+      '<path d="M84 154H118V214H110V258H84Z" style="' + STEEL + '"/>' +
+      '<rect x="70" y="140" width="10" height="130" rx="3" style="' + STEEL + '"/><rect x="66" y="196" width="18" height="18" rx="3" style="' + DARK + '"/>' +
       /* lower arm, subframe, bush */
-      '<rect x="268" y="236" width="72" height="58" class="box tint-k-soft"/>' + t(304, 312, 'Subframe', 'ts', 'middle') +
-      '<polygon points="104,263 288,261 288,277 104,277" class="metal"/>' +
-      '<circle cx="290" cy="269" r="10" class="box tint-m-soft"/>' +
-      '<circle cx="101" cy="268" r="8" class="box tint-m-soft"/>' +
+      '<rect x="268" y="236" width="72" height="58" rx="6" style="' + DARK + '"/><path d="M280 246V284M296 246V284M312 246V284" style="stroke:#8d96a0;stroke-width:1;opacity:0.4"/>' + t(304, 312, 'Subframe', 'ts', 'middle') +
+      '<path d="M104 263L288 261V277L104 277Z" style="' + STEEL + '"/><path d="M110 266H284" style="stroke:#fff;stroke-width:1.2;opacity:0.6"/>' +
+      '<circle cx="290" cy="269" r="11" style="fill:#c0392b;stroke:#5a1510;stroke-width:1.2"/><circle cx="290" cy="269" r="5" style="' + STEEL + '"/>' +
+      '<circle cx="101" cy="268" r="9" style="' + STEEL + '"/><circle cx="101" cy="268" r="3.5" style="' + DARK + '"/>' +
       /* tie rod and rack */
-      '<path d="M118 190H330" class="k bold"/>' +
-      '<rect x="330" y="178" width="120" height="24" class="metal"/>' + t(390, 195, 'Steering rack', 'ts', 'middle') +
-      '<circle cx="124" cy="190" r="6" class="box tint-m-soft"/>' +
+      '<path d="M118 190H330" style="stroke:#1d2024;stroke-width:8;stroke-linecap:round"/><path d="M118 190H330" style="stroke:#cfd4da;stroke-width:4;stroke-linecap:round"/>' +
+      '<rect x="330" y="178" width="120" height="24" rx="6" style="' + DARK + '"/><rect x="336" y="182" width="108" height="16" rx="4" style="fill:#fff;fill-opacity:0.6;stroke:none"/>' + t(390, 195, 'Steering rack', 'ts', 'middle') +
+      '<circle cx="124" cy="190" r="7" style="fill:#c0392b;stroke:#5a1510;stroke-width:1.2"/><circle cx="124" cy="190" r="3" style="' + STEEL + '"/>' +
       /* anti-roll bar */
-      '<path d="M215 232H440" class="k bold" marker-end="url(#ar)"/>' +
-      '<path d="M215 232V264" class="k"/><circle cx="215" cy="232" r="4" class="box"/><circle cx="215" cy="266" r="4" class="box"/>' +
+      '<path d="M215 232H440" style="stroke:#1d2024;stroke-width:7;stroke-linecap:round"/><path d="M428 224L442 232L428 240" style="fill:none;stroke:#1d2024;stroke-width:3;stroke-linecap:round;stroke-linejoin:round"/><path d="M215 232H440" style="stroke:#8d96a0;stroke-width:3.5;stroke-linecap:round"/>' +
+      '<path d="M215 232V264" style="stroke:#59626b;stroke-width:4"/><circle cx="215" cy="232" r="5" style="' + STEEL + '"/><circle cx="215" cy="266" r="5" style="' + STEEL + '"/>' +
       t(448, 254, 'to other wheel', 'ts', 'end') +
       /* badges and leaders */
       '<path d="M135 39H124M139 100H126M115 143L136 143M119 170H135M72 276L74 271M122 286L108 275M180 285V277M215 218V228M302 266L300 268M136 205L128 196" class="dim"/>' +
@@ -133,25 +135,27 @@ DIAGRAMS['hydraulic-brake-circuit'] = {
   svg: function () {
     var s =
       t(240, 17, 'Front of car', 'ts', 'middle') +
-      '<rect x="104" y="26" width="272" height="232" rx="26" class="k2"/>' +
+      '<rect x="104" y="26" width="272" height="232" rx="26" style="fill:url(#shMetal);fill-opacity:0.18;stroke:#59626b;stroke-width:2"/><rect x="132" y="150" width="216" height="76" rx="14" style="fill:#7fa0b8;fill-opacity:0.13;stroke:none"/>' +
       /* wheels */
-      '<rect x="64" y="128" width="22" height="44" rx="5" class="metal"/><rect x="394" y="128" width="22" height="44" rx="5" class="metal"/>' +
-      '<rect x="64" y="193" width="22" height="44" rx="5" class="metal"/><rect x="394" y="193" width="22" height="44" rx="5" class="metal"/>' +
-      '<rect x="88" y="138" width="12" height="24" class="metal-dark"/><rect x="380" y="138" width="12" height="24" class="metal-dark"/>' +
-      '<rect x="88" y="205" width="12" height="20" class="metal-dark"/><rect x="380" y="205" width="12" height="20" class="metal-dark"/>' +
-      t(75, 155, 'FL', 'tb', 'middle') + t(405, 155, 'FR', 'tb', 'middle') + t(75, 220, 'RL', 'tb', 'middle') + t(405, 220, 'RR', 'tb', 'middle') +
+      [[64, 128], [394, 128], [64, 193], [394, 193]].map(function (w) {
+        var g = '<rect x="' + w[0] + '" y="' + w[1] + '" width="22" height="44" rx="6" style="fill:#1d2024;stroke:#0a0b0d;stroke-width:1.3"/>';
+        for (var i = 8; i < 40; i += 6) g += '<path d="M' + (w[0] + 3) + ' ' + (w[1] + i) + 'H' + (w[0] + 19) + '" style="stroke:#3a4048;stroke-width:1.4"/>';
+        return g;
+      }).join('') +
+      '<rect x="88" y="136" width="12" height="28" rx="3" style="' + PAINT_RED + '"/><rect x="380" y="136" width="12" height="28" rx="3" style="' + PAINT_RED + '"/>' +
+      '<circle cx="94" cy="215" r="10" style="' + STEEL + '"/><circle cx="386" cy="215" r="10" style="' + STEEL + '"/><circle cx="94" cy="215" r="4" style="' + DARK + '"/><circle cx="386" cy="215" r="4" style="' + DARK + '"/>' +
+      t(75, 155, 'FL', 'tb', 'middle').replace('<text', '<text style="fill:#fff;stroke:none;font-size:11px"') + t(405, 155, 'FR', 'tb', 'middle').replace('<text', '<text style="fill:#fff;stroke:none;font-size:11px"') + t(75, 220, 'RL', 'tb', 'middle').replace('<text', '<text style="fill:#fff;stroke:none;font-size:11px"') + t(405, 220, 'RR', 'tb', 'middle').replace('<text', '<text style="fill:#fff;stroke:none;font-size:11px"') +
       t(75, 188, 'Caliper', 'ts', 'middle') + t(405, 188, 'Caliper', 'ts', 'middle') +
       t(75, 253, 'Drum', 'ts', 'middle') + t(405, 253, 'Drum', 'ts', 'middle') +
       /* pedal, booster, master cylinder */
-      '<rect x="114" y="47" width="8" height="24" class="metal-dark"/><path d="M122 59H139M181 59H196" class="k"/>' +
-      '<circle cx="160" cy="59" r="21" class="box tint-c-soft"/>' +
-      '<rect x="214" y="34" width="40" height="14" class="box tint-y-soft"/>' +
-      '<rect x="196" y="48" width="76" height="22" class="metal"/><path d="M234 48V70" class="k2"/>' +
+      '<rect x="114" y="46" width="9" height="26" rx="3" style="' + DARK + '"/><path d="M123 59H142M178 59H196" style="stroke:#59626b;stroke-width:4;stroke-linecap:round"/>' +
+      booster(160, 59, 21) +
+      masterCylinder(196, 48, 76, 22) +
       /* pipes */
-      '<path d="M210 70V108" class="pipe hot"/><path d="M258 70V108" class="pipe cold"/>' +
-      '<path d="M170 114H116V150H100" class="pipe hot"/><path d="M310 127H352V215H380" class="pipe hot"/>' +
-      '<path d="M310 114H364V150H380" class="pipe cold"/><path d="M170 127H128V215H100" class="pipe cold"/>' +
-      '<rect x="170" y="108" width="140" height="26" class="box tint-k-soft"/>' + t(240, 126, 'ABS / proportioning', 'ts', 'middle') +
+      hose('M210 70V108', '#d9534f', 5) + hose('M258 70V108', '#4a90d9', 5) +
+      hose('M170 114H116V150H100', '#d9534f', 5) + hose('M310 127H352V215H380', '#d9534f', 5) +
+      hose('M310 114H364V150H380', '#4a90d9', 5) + hose('M170 127H128V215H100', '#4a90d9', 5) +
+      '<rect x="170" y="108" width="140" height="26" rx="5" style="' + STEEL + '"/><rect x="176" y="112" width="128" height="18" rx="3" style="fill:#fff;fill-opacity:0.7;stroke:none"/>' + t(240, 126, 'ABS / proportioning', 'ts', 'middle') +
       badge(118, 90, 1) + badge(160, 92, 2) + badge(234, 90, 3) + badge(196, 38, 4) +
       t(240, 170, 'Circuit 1: FL + RR', 't-red', 'middle') + t(240, 190, 'Circuit 2: FR + RL', 't-blue', 'middle') +
       t(240, 214, 'If one circuit fails,', 'ts', 'middle') + t(240, 232, 'the other still brakes.', 'ts', 'middle');
@@ -162,11 +166,11 @@ DIAGRAMS['hydraulic-brake-circuit'] = {
       t(20, 346, 'Pressure = force ÷ area', 'tform') +
       t(115, 370, 'Master piston', 'ts', 'middle') + t(115, 386, '10 cm²', 'tb', 'middle') +
       t(330, 370, 'Caliper piston', 'ts', 'middle') + t(330, 386, '30 cm²', 'tb', 'middle') +
-      '<rect x="60" y="404" width="110" height="24" class="fl-oil"/><rect x="60" y="404" width="110" height="24" class="k"/>' +
-      '<rect x="64" y="404" width="6" height="24" class="metal-dark"/>' +
-      '<path d="M170 416H260" class="pipe oil"/>' +
-      '<rect x="260" y="392" width="140" height="48" class="fl-oil"/><rect x="260" y="392" width="140" height="48" class="k"/>' +
-      '<rect x="394" y="392" width="6" height="48" class="metal-dark"/>' +
+      '<rect x="56" y="400" width="118" height="32" rx="5" style="' + STEEL + '"/><rect x="62" y="405" width="106" height="22" rx="3" class="fl-oil"/>' +
+      '<rect x="64" y="404" width="9" height="24" rx="2" style="' + DARK + '"/><path d="M40 416H64" style="stroke:#8d96a0;stroke-width:6;stroke-linecap:round"/>' +
+      hose('M174 416H258', '#e0b04a', 6) +
+      '<rect x="256" y="386" width="148" height="60" rx="6" style="' + STEEL + '"/><rect x="262" y="392" width="136" height="48" rx="4" class="fl-oil"/>' +
+      '<rect x="388" y="391" width="10" height="50" rx="2" style="' + DARK + '"/><path d="M398 416H414" style="stroke:#8d96a0;stroke-width:8;stroke-linecap:round"/>' +
       '<path d="M16 416H60" class="k" marker-end="url(#ar)"/>' + t(16, 404, '100 N', 'tb') +
       '<path d="M402 416H462" class="k" marker-end="url(#ar)"/>' + t(410, 408, '300 N', 'tb') +
       t(20, 464, 'Pressure = 100 N ÷ 10 cm² = 10 N per cm²', 't') +
