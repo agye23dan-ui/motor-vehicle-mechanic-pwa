@@ -1,7 +1,7 @@
 /* Service worker. Generated into sw.js by scripts/build.js, which fills in VERSION and FILES. */
 'use strict';
 
-var VERSION = 'f97b38bdba9f';
+var VERSION = '23eac2b8714c';
 var CACHE = 'mvm-' + VERSION;
 var FILES = [
   "css/app.css",

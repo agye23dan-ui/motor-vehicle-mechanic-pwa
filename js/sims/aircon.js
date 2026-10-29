@@ -41,6 +41,61 @@ function gauge(cx, cy, val, max, label, bandLo, bandHi, unit) {
   return g;
 }
 
+/* The picture is redrawn on every change, so each animation takes a delay from the clock to keep its place. */
+function phase(period) { return '-' + ((performance.now() / 1000) % period).toFixed(3) + 's'; }
+
+/* A pipe with refrigerant inside it. The dashes move along the path at a speed that follows the flow. */
+function pipe(d, colour, flow, width) {
+  var w = width || 7, s = '<path d="' + d + '" fill="none" stroke="#1d2024" stroke-width="' + (w + 4) + '" stroke-linecap="round" stroke-linejoin="round"/>' +
+    '<path d="' + d + '" fill="none" stroke="' + colour + '" stroke-width="' + w + '" stroke-linecap="round" stroke-linejoin="round"/>';
+  if (flow > 0.05) {
+    var dur = (1.6 / (0.2 + flow * 1.6)).toFixed(2);
+    s += '<path d="' + d + '" fill="none" stroke="#fff" stroke-opacity="0.7" stroke-width="2" class="cflow" style="animation-duration:' + dur + 's;animation-delay:' + phase(+dur) + '"/>';
+  }
+  return s;
+}
+
+/* The refrigerant circuit: compressor, condenser with its fan, receiver-drier, expansion valve, evaporator and blower. */
+function system(fault, rpm) {
+  var flow = { none: 1, lowcharge: 0.45, overcharge: 1, fan: 0.8, restrict: 0.1, compressor: 0.3, air: 0.8 }[fault];
+  var hotGas = '#d9534f', liquid = '#e8913a', mist = '#5aa9e6', vapour = '#8fd0f0';
+  var fanOk = fault !== 'fan', spinDur = 0.35;
+  var g = '<defs><linearGradient id="acMetal" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e6eaee"/><stop offset="1" stop-color="#8b949d"/></linearGradient>' +
+    '<pattern id="acFins" width="4" height="4" patternUnits="userSpaceOnUse"><rect width="4" height="4" fill="#59626b"/><path d="M0 0V4" stroke="#a5aeb7" stroke-width="1.3"/></pattern></defs>';
+  // condenser with fins, and its fan behind it
+  g += '<rect x="168" y="14" width="224" height="52" rx="4" fill="url(#acFins)" stroke="#59626b"/>';
+  var fx = 280, fy = 108, bl = '';
+  for (var b = 0; b < 6; b++) bl += '<path d="M0 -5C7 -9 15 -22 8 -31C3 -23 -2 -14 -4 -6Z" transform="rotate(' + (b * 60) + ')" fill="' + (fanOk ? '#2a2f35' : '#7a2b25') + '" stroke="#12151a" stroke-width="0.7"/>';
+  g += '<rect x="244" y="72" width="72" height="72" rx="8" fill="#202429" stroke="#0e1114"/><circle cx="' + fx + '" cy="' + fy + '" r="31" fill="#14171b" stroke="#3a4048" stroke-width="1.5"/>' +
+    '<g transform="translate(' + fx + ' ' + fy + ')"><g ' + (fanOk ? 'class="fan-spin" style="animation-delay:' + phase(spinDur) + '"' : '') + '>' + bl + '</g><circle r="6" fill="#555d66"/></g>';
+  // refrigerant lines
+  g += pipe('M66 78V40H176', hotGas, flow);                                                   // compressor to condenser: hot gas
+  g += pipe('M176 28H376Q386 28 386 34Q386 40 376 40H184Q174 40 174 46Q174 52 184 52H376', fault === 'overcharge' ? liquid : '#e0663b', flow, 5);
+  g += pipe('M392 52H430V88', liquid, flow);                                                  // condenser to drier to valve: high-pressure liquid
+  g += pipe('M436 126V150H424', mist, fault === 'restrict' ? 0.05 : flow);                    // valve to evaporator: cold mist
+  g += pipe('M250 158H66V128', vapour, fault === 'restrict' ? 0.05 : flow);                  // evaporator to compressor: cold vapour
+  // receiver-drier and expansion valve
+  g += '<rect x="420" y="72" width="22" height="42" rx="8" fill="url(#acMetal)" stroke="#59626b"/><rect x="418" y="112" width="26" height="18" rx="3" fill="#b0711f" stroke="#59626b"/>';
+  if (fault === 'restrict') g += '<g opacity="0.95"><circle cx="424" cy="140" r="5" fill="#fff"/><circle cx="436" cy="143" r="6" fill="#e8f4fb"/><circle cx="446" cy="138" r="4" fill="#fff"/></g>';
+  // evaporator coil and blower
+  g += '<rect x="250" y="142" width="190" height="34" rx="4" fill="url(#acFins)" stroke="#59626b"/><rect x="250" y="142" width="190" height="34" rx="4" fill="' + mist + '" fill-opacity="0.25"/>';
+  var bx = 345, by = 202, bb = '';
+  for (var v = 0; v < 8; v++) bb += '<rect x="-2" y="-13" width="4" height="9" rx="1" fill="#3a4048" transform="rotate(' + (v * 45) + ')"/>';
+  g += '<circle cx="' + bx + '" cy="' + by + '" r="15" fill="#1d2024" stroke="#59626b"/><g transform="translate(' + bx + ' ' + by + ')"><g class="fan-spin" style="animation-duration:0.25s;animation-delay:' + phase(0.25) + '">' + bb + '<circle r="4" fill="#8d96a0"/></g></g>';
+  g += '<path d="M310 182V194M345 182V186M380 182V194" stroke="' + mist + '" stroke-width="2" stroke-dasharray="3 3"/>';
+  // compressor with its belt-driven clutch
+  g += '<rect x="30" y="78" width="72" height="50" rx="9" fill="url(#acMetal)" stroke="#59626b" stroke-width="1.5"/><circle cx="116" cy="103" r="20" fill="#2f353b" stroke="#12151a" stroke-width="2"/>' +
+    '<g transform="translate(116 103)"><g class="fan-spin" style="animation-duration:' + clamp(780 / rpm, 0.15, 0.9).toFixed(2) + 's;animation-delay:' + phase(0.4) + '"><circle r="14" fill="none" stroke="#8d96a0" stroke-width="2" stroke-dasharray="5 4"/><circle r="5" fill="#aab2ba"/></g></g>';
+  // labels
+  g += '<text x="66" y="178" class="tsm" text-anchor="middle" style="font-size:10px">Compressor</text>';
+  g += '<text x="280" y="10" class="tsm" text-anchor="middle" style="font-size:10px">Condenser</text>';
+  g += '<text x="238" y="112" class="tsm" text-anchor="end" style="font-size:10px">' + (fanOk ? 'Fan running' : 'Fan failed') + '</text>';
+  g += '<text x="470" y="82" class="tsm" style="font-size:10px">Drier</text><text x="470" y="124" class="tsm" style="font-size:10px">Expansion valve</text>';
+  g += '<text x="345" y="226" class="tsm" text-anchor="middle" style="font-size:10px">Evaporator and blower</text>';
+  g += '<g style="font-size:10px"><rect x="486" y="22" width="9" height="9" fill="' + hotGas + '"/><text x="500" y="30" class="tsm" style="font-size:10px">Hot gas</text><rect x="486" y="38" width="9" height="9" fill="' + liquid + '"/><text x="500" y="46" class="tsm" style="font-size:10px">Liquid</text><rect x="486" y="54" width="9" height="9" fill="' + mist + '"/><text x="500" y="62" class="tsm" style="font-size:10px">Cold mist</text></g>';
+  return g;
+}
+
 export function build() {
   var holder = h('div', { class: 'sim-figure' });
   var out = readout();
@@ -53,8 +108,8 @@ export function build() {
     if (ctl.fault.get() === 'fan' && rpm > 1500) high *= 0.88;
     if (ctl.fault.get() === 'restrict') low = Math.max(0, low - 4);
     var vent = 6 + (T - 30) * 0.2 + f.vent;
-    var svg = '<svg xmlns="http://www.w3.org/2000/svg" class="dg" viewBox="10 20 380 230" role="img" aria-label="Manifold gauge set: low side ' + r(low, 0) + ' psi, high side ' + r(high, 0) + ' psi"><title>A/C manifold gauges</title><desc>Two gauges showing the low-side and high-side pressures.</desc>' +
-      gauge(105, 110, low, 150, 'Low side', nl * 0.85, nl * 1.15, 'psi') + gauge(295, 110, high, 500, 'High side', nh * 0.9, nh * 1.1, 'psi') + '</svg>';
+    var svg = '<svg xmlns="http://www.w3.org/2000/svg" class="dg" viewBox="0 0 560 480" role="img" aria-label="Car air conditioning: low side ' + r(low, 0) + ' psi, high side ' + r(high, 0) + ' psi"><title>A/C system and manifold gauges</title><desc>The refrigerant circuit and a manifold gauge set showing the low-side and high-side pressures.</desc>' +
+      system(ctl.fault.get(), rpm) + gauge(140, 336, low, 150, 'Low side', nl * 0.85, nl * 1.15, 'psi') + gauge(420, 336, high, 500, 'High side', nh * 0.9, nh * 1.1, 'psi') + '</svg>';
     paint(holder, svg);
     out.set([
       ['Fault', f.name],
