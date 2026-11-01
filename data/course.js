@@ -296,8 +296,8 @@
         url: 'https://tradeskillsaustralia.com.au/automotive-qualifications/aur30620-certificate-iii-in-light-vehicle-mechanical-technology/'
       },
       {
-        title: 'United Kingdom: City & Guilds Level 3 Light Vehicle Maintenance and Repair qualification handbook (used as a cross-check)',
-        url: 'https://cityandguilds.com/-/media/productdocuments/transport_maintenance/automotive/4290/centre_documents/4290-13_l3d_lv_qualification_handbook_v3-1-pdf.ashx'
+        title: 'United Kingdom: City & Guilds Level 3 Diploma in Light Vehicle Maintenance and Repair Principles 7290-13, v1.2 June 2022 (used as a cross-check)',
+        url: 'https://cityandguilds.com/-/media/productdocuments/transport_maintenance/introductory_automotive_and_cycle_maintenance/7290/7290-level-3/centre-documents/7290-13-level-3-in-diploma-in-light-vehicle-maintenance-and-repair-principles-quaification-handbook-v1-1.pdf'
       }
     ]
   };

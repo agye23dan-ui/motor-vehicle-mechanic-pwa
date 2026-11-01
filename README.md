@@ -9,7 +9,7 @@ Vanilla JavaScript, no framework, no runtime dependencies, no accounts. Progress
 
 **Study tools:** full-course search, bookmarks and personal notes per lesson, a 15-week study plan per semester, a practical logbook (printable), and spaced-repetition flashcards.
 
-**Syllabus basis:** the module structure follows the Red Seal Automotive Service Technician occupational standard (blocks A to H), cross-checked against the Australian AUR30620 and UK City & Guilds 4290-13 qualification outlines. All text is original. Local practice, units and regulations in Ghana are not the Red Seal's, so ask your trainer where they differ.
+**Syllabus basis:** the module structure follows the Red Seal Automotive Service Technician occupational standard (blocks A to H), cross-checked against the Australian AUR30620 and UK City & Guilds 7290-13 (formerly 4290-13) qualification outlines. All text is original. Local practice, units and regulations in Ghana are not the Red Seal's, so ask your trainer where they differ.
 
 ## Run it
 
